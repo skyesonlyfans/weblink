@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebLink by Skye &lt;3</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PeerJS for WebRTC P2P Connections -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+    <style>
+        /* Custom styling for a sleeker look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast-enter {
+            animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideInBottom {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-slide-in {
+            transform: translateX(0) !important;
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(236, 72, 153, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+    </style>
+</head>
+<body class="h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden flex flex-col relative selection:bg-pink-500/30">
+
+    <!-- Background Elements -->
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-pink-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="p-4 glass-panel flex justify-between items-center z-10">
+        <h1 class="text-2xl font-black tracking-tight bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-3">
+            <i data-lucide="radio" class="text-pink-400"></i> WebLink <span class="text-sm font-medium text-slate-400 mt-1">by Skye &lt;3</span>
+        </h1>
+        <div id="my-profile" class="hidden flex items-center gap-3 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+            <span id="my-username" class="font-medium text-sm"></span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex relative overflow-hidden z-10">
+        
+        <!-- Discovery Dashboard -->
+        <div id="discovery-panel" class="w-full flex-1 p-6 md:p-10 overflow-y-auto">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-xl font-semibold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="compass" class="text-indigo-400"></i> Nearby Devices
+                    </h2>
+                    <span id="network-count" class="text-sm text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">0 Online</span>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-slate-400">
+                    <div class="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                        <i data-lucide="radar" class="w-12 h-12 text-slate-500 animate-[spin_4s_linear_infinite]"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-slate-300">Scanning network...</h3>
+                    <p class="text-sm mt-2 max-w-sm text-center">Waiting for others to join the WebLink frequency. Open this app on another device to connect.</p>
+                </div>
+
+                <!-- Users Grid -->
+                <div id="users-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- User cards injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat / Interaction Panel -->
+        <div id="chat-panel" class="absolute top-0 right-0 w-full md:w-[450px] h-full glass-panel border-l border-slate-700 flex flex-col z-30 transform translate-x-full transition-transform duration-300 ease-out shadow-2xl">
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/50">
+                <div class="flex items-center gap-3">
+                    <button id="close-chat" class="p-2 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white">
+                        <i data-lucide="x"></i>
+                    </button>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-lg font-bold shadow-md shadow-indigo-500/20" id="chat-avatar">
+                        U
+                    </div>
+                    <div>
+                        <span id="chat-username" class="font-bold block leading-tight text-slate-100">User</span>
+                        <span id="chat-status" class="text-xs text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Connected P2P</span>
+                    </div>
+                </div>
+                <button id="call-btn" class="p-3 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-full transition-colors relative group">
+                    <i data-lucide="phone" class="w-5 h-5"></i>
+                    <span class="absolute -bottom-8 right-0 text-xs bg-slate-800 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Audio Call</span>
+                </button>
+            </div>
+            
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 scroll-smooth">
+                <div class="text-center text-xs text-slate-500 my-2 bg-slate-800/50 py-1 px-3 rounded-full self-center">Connection established. Messages are P2P encrypted.</div>
+                <!-- Messages injected here -->
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-4 bg-slate-800/80 border-t border-slate-700/50 flex gap-2 items-end">
+                <input type="file" id="file-input" class="hidden">
+                <button id="attach-btn" class="p-3.5 bg-slate-700 hover:bg-slate-600 rounded-2xl transition-colors text-slate-300 hover:text-white shrink-0">
+                    <i data-lucide="paperclip" class="w-5 h-5"></i>
+                </button>
+                <div class="flex-1 bg-slate-900 border border-slate-600 rounded-2xl flex relative overflow-hidden focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+                    <textarea id="message-input" rows="1" class="w-full bg-transparent px-4 py-3.5 focus:outline-none resize-none min-h-[50px] max-h-[120px]" placeholder="Type a message..."></textarea>
+                </div>
+                <button id="send-btn" class="p-3.5 bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-pink-400 hover:to-indigo-400 rounded-2xl transition-transform transform hover:scale-[1.05] active:scale-[0.95] text-white shrink-0 shadow-lg shadow-indigo-500/25">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login/Onboarding Overlay -->
+    <div id="login-overlay" class="absolute inset-0 bg-slate-900/95 backdrop-blur-md flex items-center justify-center z-50 transition-opacity duration-500">
+        <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl shadow-indigo-500/10 w-full max-w-md border border-slate-700 text-center mx-4">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-tr from-pink-500 to-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-pink-500/20 pulse-ring">
+                <i data-lucide="satellite" class="text-white w-12 h-12"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-2">WebLink <span class="text-pink-400 text-sm">by Skye</span></h2>
+            <p class="text-slate-400 mb-8 text-sm">Discover nearby devices and connect peer-to-peer over your local network.</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="user" class="w-5 h-5 text-slate-500"></i>
+                    </div>
+                    <input type="text" id="username-input" required maxlength="20" class="w-full bg-slate-900 border border-slate-700 rounded-2xl pl-12 pr-4 py-4 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-lg placeholder-slate-500 transition-all" placeholder="Choose a username">
+                </div>
+                <button type="submit" id="join-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 rounded-2xl font-bold text-white shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex justify-center items-center gap-2">
+                    Start Linking <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Call Overlay (Hidden by default) -->
+    <div id="call-overlay" class="hidden absolute inset-0 bg-slate-900/98 backdrop-blur-xl z-[60] flex flex-col items-center justify-center">
+        <audio id="remote-audio" autoplay></audio>
+        
+        <div class="w-32 h-32 bg-gradient-to-tr from-pink-500 to-indigo-500 rounded-full flex items-center justify-center mb-8 shadow-[0_0_40px_rgba(236,72,153,0.3)] pulse-ring relative">
+            <span id="call-avatar-text" class="text-5xl font-bold text-white z-10">?</span>
+        </div>
+        
+        <h2 id="call-status-text" class="text-3xl font-bold mb-2 text-white">Incoming Call...</h2>
+        <p id="call-name-text" class="text-xl text-slate-300 mb-2">User</p>
+        <p id="call-duration" class="text-slate-400 mb-12 font-mono text-lg">00:00</p>
+        
+        <div class="flex gap-8 justify-center items-center">
+            <button id="end-call-btn" class="w-16 h-16 bg-rose-500 hover:bg-rose-400 rounded-full flex items-center justify-center shadow-lg shadow-rose-500/30 transition-transform hover:scale-110">
+                <i data-lucide="phone-off" class="w-6 h-6 text-white"></i>
+            </button>
+            <button id="accept-call-btn" class="hidden w-16 h-16 bg-emerald-500 hover:bg-emerald-400 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-transform hover:scale-110">
+                <i data-lucide="phone" class="w-6 h-6 text-white"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="absolute bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Main Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Core Application State ---
+        let db, auth, currentUid = null;
+        let myUsername = "";
+        let peer = null;
+        let myPeerId = null;
+        
+        let networkUsers = []; // All online users
+        let activeConnections = {}; // targetPeerId -> PeerJS DataConnection
+        let chatHistories = {}; // targetPeerId -> Array of message objects
+        
+        let currentActiveChatPeerId = null;
+        
+        // Audio Call State
+        let currentCall = null;
+        let localStream = null;
+        let callTimer = null;
+        let callSeconds = 0;
+
+        // Configuration
+        const HEARTBEAT_INTERVAL = 10000; // 10s
+        const USER_TIMEOUT = 35000; // 35s - remove users not seen
+        
+        // Global environment variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'weblink-3cb66';
+
+        // --- DOM Elements ---
+        const elements = {
+            loginOverlay: document.getElementById('login-overlay'),
+            loginForm: document.getElementById('login-form'),
+            usernameInput: document.getElementById('username-input'),
+            myProfile: document.getElementById('my-profile'),
+            myUsernameDisplay: document.getElementById('my-username'),
+            usersGrid: document.getElementById('users-grid'),
+            emptyState: document.getElementById('empty-state'),
+            networkCount: document.getElementById('network-count'),
+            
+            chatPanel: document.getElementById('chat-panel'),
+            closeChat: document.getElementById('close-chat'),
+            chatUsername: document.getElementById('chat-username'),
+            chatAvatar: document.getElementById('chat-avatar'),
+            chatMessages: document.getElementById('chat-messages'),
+            messageInput: document.getElementById('message-input'),
+            sendBtn: document.getElementById('send-btn'),
+            attachBtn: document.getElementById('attach-btn'),
+            fileInput: document.getElementById('file-input'),
+            callBtn: document.getElementById('call-btn'),
+            
+            callOverlay: document.getElementById('call-overlay'),
+            callStatusText: document.getElementById('call-status-text'),
+            callNameText: document.getElementById('call-name-text'),
+            callAvatarText: document.getElementById('call-avatar-text'),
+            callDuration: document.getElementById('call-duration'),
+            acceptCallBtn: document.getElementById('accept-call-btn'),
+            endCallBtn: document.getElementById('end-call-btn'),
+            remoteAudio: document.getElementById('remote-audio'),
+            
+            toastContainer: document.getElementById('toast-container')
+        };
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- Initialization & Auth ---
+        async function init() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDd5267BUf3xVrjvUsaHvXZBMCZ_dHxtt4",
+                    authDomain: "weblink-3cb66.firebaseapp.com",
+                    projectId: "weblink-3cb66",
+                    storageBucket: "weblink-3cb66.firebasestorage.app",
+                    messagingSenderId: "148181069266",
+                    appId: "1:148181069266:web:9d4f8b72d801b3af0eac0b",
+                    measurementId: "G-SMC5M6YW2C"
+                };
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // FIXED: Auth token priority. 
+                // The environment might provide a __initial_auth_token but if it belongs to a different project
+                // (like the default one), it causes auth/custom-token-mismatch.
+                // We will attempt custom token only if we are in the default preview environment, 
+                // otherwise we use anonymous auth for the provided project config.
+                
+                const initAuth = async () => {
+                    try {
+                        // Only use the custom token if we are likely using the default sandbox config
+                        // If the user has provided their own API key, it's safer to use anonymous sign-in 
+                        // to prevent cross-project token errors.
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && firebaseConfig.apiKey === "AIzaSyDd5267BUf3xVrjvUsaHvXZBMCZ_dHxtt4") {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (authErr) {
+                        console.warn("Auth attempt failed, falling back to anonymous:", authErr);
+                        await signInAnonymously(auth);
+                    }
+                };
+
+                await initAuth();
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUid = user.uid;
+                        setupDiscoveryListener();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Initialization error:", err);
+                showToast("Failed to connect to discovery servers.", "error");
+            }
+        }
+
+        elements.loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = elements.usernameInput.value.trim();
+            if (name.length < 2) return;
+            
+            myUsername = name;
+            
+            // UI Updates
+            elements.loginOverlay.style.opacity = '0';
+            setTimeout(() => elements.loginOverlay.style.display = 'none', 500);
+            
+            elements.myProfile.classList.remove('hidden');
+            elements.myUsernameDisplay.textContent = myUsername;
+            
+            showToast(`Welcome, ${myUsername}!`);
+            
+            // Initialize WebRTC
+            initPeerJS();
+        });
+
+        // --- P2P WebRTC Layer (PeerJS) ---
+        function initPeerJS() {
+            peer = new Peer(undefined, { debug: 1 });
+
+            peer.on('open', (id) => {
+                myPeerId = id;
+                announcePresence();
+                setInterval(announcePresence, HEARTBEAT_INTERVAL);
+            });
+
+            peer.on('connection', (conn) => {
+                handleIncomingConnection(conn);
+            });
+
+            peer.on('call', (call) => {
+                handleIncomingCall(call);
+            });
+
+            peer.on('error', (err) => {
+                console.error("PeerJS Error:", err);
+                showToast("P2P Error: " + err.type, "error");
+            });
+        }
+
+        // --- Discovery Layer ---
+        function announcePresence() {
+            if (!currentUid || !myPeerId) return;
+            
+            const presenceRef = doc(db, 'artifacts', appId, 'public', 'data', 'weblink_presence', currentUid);
+            setDoc(presenceRef, {
+                uid: currentUid,
+                username: myUsername,
+                peerId: myPeerId,
+                timestamp: Date.now()
+            }).catch(e => console.error("Presence update failed:", e));
+        }
+
+        function setupDiscoveryListener() {
+            const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'weblink_presence');
+            
+            onSnapshot(collectionRef, (snapshot) => {
+                const now = Date.now();
+                networkUsers = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.uid !== currentUid && (now - data.timestamp < USER_TIMEOUT)) {
+                        networkUsers.push(data);
+                    }
+                });
+                
+                renderUsers();
+            }, (error) => {
+                console.error("Discovery error:", error);
+            });
+        }
+
+        function renderUsers() {
+            elements.networkCount.textContent = `${networkUsers.length} Online`;
+            
+            if (networkUsers.length === 0) {
+                elements.emptyState.classList.remove('hidden');
+                elements.usersGrid.innerHTML = '';
+                return;
+            }
+            
+            elements.emptyState.classList.add('hidden');
+            elements.usersGrid.innerHTML = '';
+            
+            networkUsers.forEach(user => {
+                const initial = user.username.charAt(0).toUpperCase();
+                const card = document.createElement('div');
+                card.className = "glass-panel p-5 rounded-2xl hover:bg-slate-800/80 cursor-pointer transition-all transform hover:-translate-y-1 hover:shadow-lg border border-slate-700/50 group";
+                card.onclick = () => openChat(user);
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-xl font-bold shadow-inner group-hover:from-pink-500/80 group-hover:to-indigo-500/80 transition-all text-white">
+                            ${initial}
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <h3 class="font-bold text-lg text-slate-100 truncate">${user.username}</h3>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="text-xs text-slate-400">Available</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                elements.usersGrid.appendChild(card);
+            });
+        }
+
+        function getOrCreateConnection(targetPeerId) {
+            return new Promise((resolve) => {
+                if (activeConnections[targetPeerId] && activeConnections[targetPeerId].open) {
+                    resolve(activeConnections[targetPeerId]);
+                    return;
+                }
+                const conn = peer.connect(targetPeerId, { reliable: true });
+                conn.on('open', () => {
+                    activeConnections[targetPeerId] = conn;
+                    setupDataListeners(conn);
+                    resolve(conn);
+                });
+                conn.on('error', (err) => { showToast("Connection failed.", "error"); });
+            });
+        }
+
+        function handleIncomingConnection(conn) {
+            conn.on('open', () => {
+                activeConnections[conn.peer] = conn;
+                setupDataListeners(conn);
+                const user = networkUsers.find(u => u.peerId === conn.peer);
+                if (user) showToast(`New connection from ${user.username}`);
+            });
+        }
+
+        function setupDataListeners(conn) {
+            conn.on('data', (data) => {
+                if (data.type === 'text') {
+                    saveMessage(conn.peer, { sender: 'them', type: 'text', content: data.text });
+                    if (currentActiveChatPeerId === conn.peer) renderMessages(conn.peer);
+                    else {
+                        const user = networkUsers.find(u => u.peerId === conn.peer);
+                        showToast(`New message from ${user ? user.username : 'Someone'}`);
+                    }
+                } else if (data.type === 'file') {
+                    const blob = new Blob([data.file], { type: data.mime });
+                    const url = URL.createObjectURL(blob);
+                    saveMessage(conn.peer, { 
+                        sender: 'them', type: 'file', filename: data.filename, url: url, size: data.size
+                    });
+                    if (currentActiveChatPeerId === conn.peer) renderMessages(conn.peer);
+                    else showToast(`Received file from ${data.filename}`);
+                }
+            });
+            conn.on('close', () => { delete activeConnections[conn.peer]; });
+        }
+
+        function openChat(user) {
+            currentActiveChatPeerId = user.peerId;
+            elements.chatUsername.textContent = user.username;
+            elements.chatAvatar.textContent = user.username.charAt(0).toUpperCase();
+            elements.chatPanel.classList.remove('translate-x-full');
+            elements.chatPanel.classList.add('chat-slide-in');
+            renderMessages(user.peerId);
+            getOrCreateConnection(user.peerId);
+        }
+
+        elements.closeChat.addEventListener('click', () => {
+            elements.chatPanel.classList.remove('chat-slide-in');
+            elements.chatPanel.classList.add('translate-x-full');
+            currentActiveChatPeerId = null;
+        });
+
+        async function sendMessage() {
+            if (!currentActiveChatPeerId) return;
+            const text = elements.messageInput.value.trim();
+            if (!text) return;
+            elements.messageInput.value = '';
+            saveMessage(currentActiveChatPeerId, { sender: 'me', type: 'text', content: text });
+            renderMessages(currentActiveChatPeerId);
+            const conn = await getOrCreateConnection(currentActiveChatPeerId);
+            conn.send({ type: 'text', text: text });
+        }
+
+        elements.sendBtn.addEventListener('click', sendMessage);
+        elements.messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+
+        elements.attachBtn.addEventListener('click', () => elements.fileInput.click());
+        elements.fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file || !currentActiveChatPeerId) return;
+            if (file.size > 15 * 1024 * 1024) { showToast("File too large. Max 15MB allowed.", "error"); return; }
+            elements.fileInput.value = ''; 
+            saveMessage(currentActiveChatPeerId, { sender: 'me', type: 'text', content: `<em>Sending file: ${file.name}...</em>` });
+            renderMessages(currentActiveChatPeerId);
+            try {
+                const conn = await getOrCreateConnection(currentActiveChatPeerId);
+                conn.send({ type: 'file', file: file, filename: file.name, mime: file.type, size: file.size });
+                chatHistories[currentActiveChatPeerId].pop(); 
+                saveMessage(currentActiveChatPeerId, { sender: 'me', type: 'file', filename: file.name, url: null, size: file.size });
+                renderMessages(currentActiveChatPeerId);
+            } catch (err) { showToast("Failed to send file.", "error"); }
+        });
+
+        function saveMessage(peerId, msg) {
+            if (!chatHistories[peerId]) chatHistories[peerId] = [];
+            chatHistories[peerId].push(msg);
+        }
+
+        function renderMessages(peerId) {
+            const msgs = chatHistories[peerId] || [];
+            elements.chatMessages.innerHTML = '';
+            if (msgs.length === 0) {
+                elements.chatMessages.innerHTML = `<div class="text-center text-slate-500 text-sm mt-10">No messages yet. Say hello!</div>`;
+                return;
+            }
+            msgs.forEach(msg => {
+                const isMe = msg.sender === 'me';
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex w-full ${isMe ? 'justify-end' : 'justify-start'}`;
+                let contentHTML = msg.type === 'text' ? `<p class="whitespace-pre-wrap text-sm">${msg.content}</p>` : `
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="file" class="w-5 h-5"></i>
+                            <p class="text-sm font-medium">${msg.filename}</p>
+                        </div>
+                        ${isMe ? `<p class="text-xs opacity-70">${(msg.size/1024/1024).toFixed(2)} MB</p>` : `
+                        <a href="${msg.url}" download="${msg.filename}" class="flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white text-xs py-1.5 px-3 rounded-lg transition-colors">
+                            <i data-lucide="download" class="w-4 h-4"></i> Download ${(msg.size/1024/1024).toFixed(2)} MB
+                        </a>`}
+                    </div>`;
+                wrapper.innerHTML = `<div class="max-w-[80%] p-3 ${isMe ? 'bg-indigo-600 text-white rounded-2xl rounded-br-sm' : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-2xl rounded-bl-sm'} shadow-sm">${contentHTML}</div>`;
+                elements.chatMessages.appendChild(wrapper);
+            });
+            lucide.createIcons();
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        async function getLocalStream() {
+            try { return await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); } 
+            catch (err) { showToast("Microphone access denied.", "error"); return null; }
+        }
+
+        elements.callBtn.addEventListener('click', async () => {
+            if (!currentActiveChatPeerId) return;
+            const stream = await getLocalStream();
+            if (!stream) return;
+            localStream = stream;
+            const targetUser = networkUsers.find(u => u.peerId === currentActiveChatPeerId);
+            showCallOverlay('calling', targetUser ? targetUser.username : "User");
+            currentCall = peer.call(currentActiveChatPeerId, localStream);
+            setupCallEvents(currentCall);
+        });
+
+        function handleIncomingCall(call) {
+            currentCall = call;
+            const caller = networkUsers.find(u => u.peerId === call.peer);
+            showCallOverlay('incoming', caller ? caller.username : "Unknown");
+            elements.acceptCallBtn.classList.remove('hidden');
+        }
+
+        elements.acceptCallBtn.addEventListener('click', async () => {
+            if (!currentCall) return;
+            const stream = await getLocalStream();
+            if (!stream) { currentCall.close(); hideCallOverlay(); return; }
+            localStream = stream;
+            elements.acceptCallBtn.classList.add('hidden');
+            elements.callStatusText.textContent = "Connected";
+            currentCall.answer(localStream);
+            setupCallEvents(currentCall);
+        });
+
+        elements.endCallBtn.addEventListener('click', () => endCurrentCall());
+
+        function setupCallEvents(call) {
+            call.on('stream', (remoteStream) => {
+                elements.remoteAudio.srcObject = remoteStream;
+                elements.callStatusText.textContent = "In Call";
+                startCallTimer();
+            });
+            call.on('close', () => endCurrentCall(false));
+            call.on('error', (err) => { showToast("Call error", "error"); endCurrentCall(false); });
+        }
+
+        function endCurrentCall(closeObject = true) {
+            if (currentCall && closeObject) currentCall.close();
+            if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
+            currentCall = null;
+            elements.remoteAudio.srcObject = null;
+            stopCallTimer();
+            hideCallOverlay();
+        }
+
+        function showCallOverlay(mode, name) {
+            elements.callOverlay.classList.remove('hidden');
+            elements.callNameText.textContent = name;
+            elements.callAvatarText.textContent = name.charAt(0).toUpperCase();
+            elements.callStatusText.textContent = mode === 'calling' ? "Calling..." : "Incoming Call...";
+            if (mode === 'calling') elements.acceptCallBtn.classList.add('hidden');
+        }
+
+        function hideCallOverlay() {
+            elements.callOverlay.classList.add('hidden');
+            elements.acceptCallBtn.classList.add('hidden');
+            elements.callDuration.textContent = "00:00";
+        }
+
+        function startCallTimer() {
+            callSeconds = 0; clearInterval(callTimer);
+            callTimer = setInterval(() => {
+                callSeconds++;
+                const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+                const s = String(callSeconds % 60).padStart(2, '0');
+                elements.callDuration.textContent = `${m}:${s}`;
+            }, 1000);
+        }
+        function stopCallTimer() { clearInterval(callTimer); }
+
+        function showToast(message, type = "success") {
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm text-white border ${type === 'error' ? 'bg-rose-500' : 'bg-slate-800 border-slate-700'} toast-enter pointer-events-auto`;
+            toast.innerHTML = `${type === 'error' ? '<i data-lucide="alert-circle" class="w-4 h-4"></i>' : '<i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>'} <span>${message}</span>`;
+            elements.toastContainer.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => {
+                toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        elements.messageInput.addEventListener('input', function() {
+            this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';
+            if (this.value === '') this.style.height = 'auto';
+        });
+
+        init();
+    </script>
+</body>
+</html>
