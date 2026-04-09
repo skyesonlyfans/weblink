@@ -34,14 +34,12 @@
         .gif-grid img { width: 100%; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
         .gif-grid img:active { transform: scale(0.95); }
 
-        /* Tabs */
         .tab-active { color: #fff; border-bottom: 2px solid #ec4899; }
         .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
     </style>
 </head>
 <body class="h-screen-ios bg-slate-950 text-slate-100 font-sans overflow-hidden flex flex-col relative">
 
-    <!-- Bootloader -->
     <div id="boot-overlay" class="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-1000">
         <i data-lucide="radio" class="w-14 h-14 text-pink-500 animate-pulse mb-6 pulse-ring rounded-full"></i>
         <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 tracking-[0.2em] uppercase mb-12">WebLink</h1>
@@ -53,13 +51,11 @@
         </div>
     </div>
 
-    <!-- Background Glow -->
     <div class="fixed inset-0 pointer-events-none z-0">
         <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-pink-600/10 rounded-full blur-[120px]"></div>
         <div class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
     </div>
 
-    <!-- Header -->
     <header class="sticky top-0 p-4 glass-panel flex flex-col z-40 border-b border-white/5 space-y-3">
         <div class="flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
@@ -76,24 +72,24 @@
                 <button id="pairing-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Pair Device">
                     <i data-lucide="qr-code" class="w-5 h-5 text-indigo-300"></i>
                 </button>
-                <div id="my-profile" class="hidden flex items-center gap-2 bg-slate-900/50 px-2 py-1.5 rounded-full border border-white/10 ml-2">
+                <div id="my-profile" class="hidden flex items-center gap-2 bg-slate-900/50 px-2 py-1.5 rounded-full border border-white/10 ml-1">
                     <img id="my-avatar-img" class="w-6 h-6 rounded-full hidden bg-slate-800 object-cover">
                     <div id="my-avatar-fallback" class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">?</div>
+                    <button id="sign-out-btn" class="ml-1 px-1 text-slate-400 hover:text-rose-400 transition-colors" title="Sign Out">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
         </div>
         
-        <!-- Navigation Tabs -->
         <div class="flex w-full gap-4 px-1">
             <button id="tab-local" class="tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Local WiFi</button>
             <button id="tab-friends" class="tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Friends <span id="friend-count" class="ml-1 text-[9px] bg-slate-800 px-1.5 rounded-full">0</span></button>
         </div>
     </header>
 
-    <!-- Main Feed -->
     <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative z-10">
         <div class="max-w-2xl mx-auto space-y-4">
-            
             <div class="flex items-center justify-between px-1 mb-2">
                 <h2 id="view-title" class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -102,9 +98,7 @@
                 <span id="network-count" class="text-[10px] font-bold text-slate-400">0 PEERS</span>
             </div>
 
-            <!-- Active Groups List -->
             <div id="groups-grid" class="grid grid-cols-1 gap-3 empty:hidden mb-2"></div>
-            <!-- Active Users List -->
             <div id="users-grid" class="grid grid-cols-1 gap-3"></div>
 
             <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-slate-500 space-y-4">
@@ -133,13 +127,8 @@
                 <div class="pt-4 border-t border-white/5 space-y-3">
                     <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Link Code / Group Code</p>
                     <div class="flex flex-col gap-2">
-                        <input type="text" id="target-code-input" maxlength="8" 
-                            class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-[0.3em] focus:ring-2 focus:ring-pink-500 outline-none uppercase placeholder:tracking-normal placeholder:text-slate-700" 
-                            placeholder="000000">
-                        <button id="connect-code-btn" 
-                            class="w-full bg-indigo-600 py-3 rounded-xl font-black hover:bg-indigo-500 active:scale-[0.97] transition-all text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20">
-                            Confirm Link
-                        </button>
+                        <input type="text" id="target-code-input" maxlength="8" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-[0.3em] focus:ring-2 focus:ring-pink-500 outline-none uppercase placeholder:tracking-normal placeholder:text-slate-700" placeholder="000000">
+                        <button id="connect-code-btn" class="w-full bg-indigo-600 py-3 rounded-xl font-black hover:bg-indigo-500 active:scale-[0.97] transition-all text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20">Confirm Link</button>
                     </div>
                 </div>
             </div>
@@ -159,8 +148,8 @@
                 </div>
             </div>
             <div class="flex items-center gap-1">
-                <button id="add-friend-btn" class="hidden w-9 h-9 bg-slate-800 text-pink-400 rounded-full flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
-                <button id="call-btn" class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="phone" class="w-4 h-4"></i></button>
+                <button id="add-friend-btn" class="hidden w-9 h-9 bg-slate-800 text-pink-400 rounded-full flex items-center justify-center active:scale-90 transition-transform" title="Add Friend"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
+                <button id="call-btn" class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center active:scale-90 transition-transform" title="Audio Call"><i data-lucide="phone" class="w-4 h-4"></i></button>
             </div>
         </div>
         
@@ -213,7 +202,7 @@
                 <div class="flex-grow border-t border-slate-800"></div>
             </div>
             <button id="guest-login-btn" class="w-full py-4 bg-slate-900 border border-white/10 text-white font-bold rounded-xl active:scale-95 transition-transform text-xs uppercase tracking-widest">
-                Begin chatting as Guest
+                Play as Guest
             </button>
         </div>
     </div>
@@ -244,7 +233,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Config ---
@@ -289,7 +278,7 @@
             bootOverlay: document.getElementById('boot-overlay'), bootProgress: document.getElementById('boot-progress'), bootText: document.getElementById('boot-text'),
             loginOverlay: document.getElementById('login-overlay'), guestLoginBtn: document.getElementById('guest-login-btn'), googleLoginBtn: document.getElementById('google-login-btn'),
             usernameOverlay: document.getElementById('username-overlay'), usernameForm: document.getElementById('username-form'), newUsernameInput: document.getElementById('new-username-input'),
-            myUsernameDisplay: document.getElementById('my-username-display'), myProfile: document.getElementById('my-profile'), myAvatarImg: document.getElementById('my-avatar-img'), myAvatarFallback: document.getElementById('my-avatar-fallback'),
+            myUsernameDisplay: document.getElementById('my-username-display'), myProfile: document.getElementById('my-profile'), myAvatarImg: document.getElementById('my-avatar-img'), myAvatarFallback: document.getElementById('my-avatar-fallback'), signOutBtn: document.getElementById('sign-out-btn'),
             tabLocal: document.getElementById('tab-local'), tabFriends: document.getElementById('tab-friends'), friendCount: document.getElementById('friend-count'),
             viewTitle: document.getElementById('view-title'), emptyTitle: document.getElementById('empty-title'), emptySub: document.getElementById('empty-sub'),
             usersGrid: document.getElementById('users-grid'), groupsGrid: document.getElementById('groups-grid'), emptyState: document.getElementById('empty-state'), networkCount: document.getElementById('network-count'),
@@ -303,9 +292,9 @@
         function showToast(msg, type = 'info') {
             const t = document.createElement('div');
             t.className = `p-3 rounded-xl ${type === 'error' ? 'bg-rose-500' : 'bg-slate-800'} text-white text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 pointer-events-auto`;
-            t.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}" class="w-3 h-3"></i> ${msg}`;
+            t.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}" class="w-4 h-4"></i> ${msg}`;
             els.toastContainer.appendChild(t); lucide.createIcons();
-            setTimeout(() => t.remove(), 3500);
+            setTimeout(() => t.remove(), 4000);
         }
 
         // --- IP Fetch for True Local Discovery ---
@@ -366,8 +355,8 @@
                 isGuest = false;
                 myAvatarUrl = result.user.photoURL;
                 
-                // Check if profile exists
-                const profRef = doc(db, 'artifacts', APP_ID, 'users', result.user.uid, 'profile');
+                // Fetch Profile securely based on strict path rules
+                const profRef = doc(db, 'artifacts', APP_ID, 'users', result.user.uid, 'account', 'profile');
                 const snap = await getDoc(profRef);
                 
                 if (snap.exists()) {
@@ -378,7 +367,15 @@
                     els.loginOverlay.style.display = 'none';
                     els.usernameOverlay.style.display = 'flex';
                 }
-            } catch(e) { showToast("Sign in failed", "error"); }
+            } catch(e) { 
+                console.error(e);
+                // Graceful fallback for iframe sandbox limitations
+                if (e.message.includes("Cross-Origin") || e.message.includes("popup")) {
+                    showToast("Google Auth is blocked by the Sandbox Preview. Please deploy to GitHub/Netlify, or use 'Play as Guest' for now.", "error");
+                } else {
+                    showToast("Sign in failed: " + e.message, "error");
+                }
+            }
         };
 
         // Create Profile
@@ -388,7 +385,7 @@
             if(!name || !auth.currentUser) return;
             
             myUsername = name;
-            const profRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'profile');
+            const profRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'account', 'profile');
             await setDoc(profRef, { username: myUsername, photoURL: myAvatarUrl, uid: auth.currentUser.uid });
             
             els.usernameOverlay.style.display = 'none';
@@ -408,6 +405,17 @@
             }
             initPeer();
         }
+
+        // Sign Out
+        els.signOutBtn.onclick = async () => {
+            if (confirm("Are you sure you want to sign out?")) {
+                if(auth.currentUser && myPeerId) {
+                    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
+                }
+                await signOut(auth);
+                location.reload();
+            }
+        };
 
         // --- Network & PeerJS ---
         function initPeer() {
@@ -432,6 +440,7 @@
             // Clean presence on close
             window.addEventListener('beforeunload', () => {
                 if(auth.currentUser && myPeerId) {
+                    // Send synchronous beacon request to guarantee wipe before tab closes
                     deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
                 }
             });
@@ -517,7 +526,7 @@
                 els.groupsGrid.innerHTML = '';
                 Object.values(activeGroups).forEach(g => {
                     const c = document.createElement('div');
-                    c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-pink-500/20 bg-pink-900/10";
+                    c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-pink-500/20 bg-pink-900/10 cursor-pointer";
                     c.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full bg-pink-600/20 flex items-center justify-center text-pink-400"><i data-lucide="users" class="w-4 h-4"></i></div>
@@ -535,7 +544,7 @@
             // Users
             displayUsers.forEach(u => {
                 const c = document.createElement('div');
-                c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-white/5";
+                c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-white/5 cursor-pointer";
                 
                 let avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-9 h-9 rounded-full object-cover">` : `<div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-400">${u.username[0].toUpperCase()}</div>`;
                 
@@ -581,6 +590,7 @@
         els.connectCodeBtn.onclick = async () => {
             const code = els.targetCodeInput.value.trim().toUpperCase();
             if(!code) return showToast("Enter code", "error");
+            showToast("Resolving link...");
             
             const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', code));
             if(snap.exists()) {
@@ -595,9 +605,11 @@
                         }
                         joinLocalGroup(gData);
                         openChat(gData.id, gData.name, null, true);
+                        showToast(`Joined ${gData.name}`);
                     }
                 } else {
                     openChat(data.peerId, data.username, data, false);
+                    showToast("Linked to User!");
                 }
                 els.pairingModal.classList.add('hidden');
                 els.targetCodeInput.value = '';
