@@ -11,78 +11,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        :root {
-            --sat: env(safe-area-inset-top);
-            --sab: env(safe-area-inset-bottom);
-        }
-
-        body {
-            padding-top: var(--sat);
-            padding-bottom: var(--sab);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .h-screen-ios {
-            height: 100vh;
-            height: -webkit-fill-available;
-        }
-
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .pairing-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
-            max-width: calc(100vw - 32px);
-        }
-
-        #qrcode img {
-            margin: 0 auto;
-            border-radius: 12px;
-            padding: 6px;
-            background: white;
-            max-width: 130px;
-            height: auto;
-        }
-
-        .pulse-ring {
-            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-        }
-
+        :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
+        body { padding-top: var(--sat); padding-bottom: var(--sab); -webkit-tap-highlight-color: transparent; }
+        .h-screen-ios { height: 100vh; height: -webkit-fill-available; }
+        
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .pairing-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)); max-width: calc(100vw - 32px); }
+        
+        #qrcode img { margin: 0 auto; border-radius: 12px; padding: 6px; background: white; max-width: 130px; height: auto; }
+        
+        .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
         @keyframes pulse-ring {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
             70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
         }
-
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Loader Animation */
-        .progress-bar-fill {
-            transition: width 3.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .gif-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-        .gif-grid img {
-            width: 100%;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+        .progress-bar-fill { transition: width 3.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gif-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .gif-grid img { width: 100%; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
         .gif-grid img:active { transform: scale(0.95); }
+
+        /* Tabs */
+        .tab-active { color: #fff; border-bottom: 2px solid #ec4899; }
+        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
     </style>
 </head>
 <body class="h-screen-ios bg-slate-950 text-slate-100 font-sans overflow-hidden flex flex-col relative">
 
-    <!-- 1. Bootloader / Update Checker Overlay -->
+    <!-- Bootloader -->
     <div id="boot-overlay" class="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-1000">
         <i data-lucide="radio" class="w-14 h-14 text-pink-500 animate-pulse mb-6 pulse-ring rounded-full"></i>
         <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 tracking-[0.2em] uppercase mb-12">WebLink</h1>
@@ -101,45 +60,58 @@
     </div>
 
     <!-- Header -->
-    <header class="sticky top-0 p-4 glass-panel flex justify-between items-center z-40 border-b border-white/5">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20">
-                <i data-lucide="radio" class="w-5 h-5 text-white"></i>
+    <header class="sticky top-0 p-4 glass-panel flex flex-col z-40 border-b border-white/5 space-y-3">
+        <div class="flex justify-between items-center w-full">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20">
+                    <i data-lucide="radio" class="w-5 h-5 text-white"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 to-indigo-300 bg-clip-text text-transparent">WebLink</h1>
             </div>
-            <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 to-indigo-300 bg-clip-text text-transparent">WebLink</h1>
+            
+            <div class="flex items-center gap-2">
+                <button id="create-group-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Create Group">
+                    <i data-lucide="users" class="w-5 h-5 text-pink-300"></i>
+                </button>
+                <button id="pairing-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Pair Device">
+                    <i data-lucide="qr-code" class="w-5 h-5 text-indigo-300"></i>
+                </button>
+                <div id="my-profile" class="hidden flex items-center gap-2 bg-slate-900/50 px-2 py-1.5 rounded-full border border-white/10 ml-2">
+                    <img id="my-avatar-img" class="w-6 h-6 rounded-full hidden bg-slate-800 object-cover">
+                    <div id="my-avatar-fallback" class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">?</div>
+                </div>
+            </div>
         </div>
         
-        <div class="flex items-center gap-2">
-            <button id="create-group-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Create Group">
-                <i data-lucide="users" class="w-5 h-5 text-pink-300"></i>
-            </button>
-            <button id="pairing-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Pair Device">
-                <i data-lucide="qr-code" class="w-5 h-5 text-indigo-300"></i>
-            </button>
+        <!-- Navigation Tabs -->
+        <div class="flex w-full gap-4 px-1">
+            <button id="tab-local" class="tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Local WiFi</button>
+            <button id="tab-friends" class="tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Friends <span id="friend-count" class="ml-1 text-[9px] bg-slate-800 px-1.5 rounded-full">0</span></button>
         </div>
     </header>
 
-    <!-- Discovery Feed -->
+    <!-- Main Feed -->
     <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative z-10">
-        <div class="max-w-2xl mx-auto space-y-6">
-            <div class="flex items-center justify-between px-1">
-                <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+        <div class="max-w-2xl mx-auto space-y-4">
+            
+            <div class="flex items-center justify-between px-1 mb-2">
+                <h2 id="view-title" class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Live Network
+                    Nearby Devices
                 </h2>
                 <span id="network-count" class="text-[10px] font-bold text-slate-400">0 PEERS</span>
             </div>
 
             <!-- Active Groups List -->
-            <div id="groups-grid" class="grid grid-cols-1 gap-3 empty:hidden mb-4"></div>
+            <div id="groups-grid" class="grid grid-cols-1 gap-3 empty:hidden mb-2"></div>
             <!-- Active Users List -->
             <div id="users-grid" class="grid grid-cols-1 gap-3"></div>
 
             <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-slate-500 space-y-4">
                 <i data-lucide="radar" class="w-10 h-10 text-slate-800 animate-spin-slow"></i>
                 <div class="text-center">
-                    <p class="text-sm font-medium">Scanning for devices & groups...</p>
-                    <p class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Use QR for non-local pairing</p>
+                    <p id="empty-title" class="text-sm font-medium">Scanning network...</p>
+                    <p id="empty-sub" class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Only showing devices on your WiFi</p>
                 </div>
             </div>
         </div>
@@ -152,14 +124,12 @@
                 <h3 class="text-lg font-black tracking-tight">Pairing Center</h3>
                 <button id="close-pairing" class="p-2 bg-slate-800 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-
             <div class="space-y-4 text-center">
                 <div id="qrcode" class="mx-auto p-2 bg-white rounded-xl inline-block shadow-lg"></div>
                 <div class="space-y-0.5">
                     <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Your Code</p>
                     <div id="pairing-code-text" class="text-3xl font-black tracking-[0.2em] text-indigo-400 font-mono">------</div>
                 </div>
-
                 <div class="pt-4 border-t border-white/5 space-y-3">
                     <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Link Code / Group Code</p>
                     <div class="flex flex-col gap-2">
@@ -181,18 +151,21 @@
         <div class="p-4 glass-panel border-b border-white/5 flex items-center justify-between sticky top-0">
             <div class="flex items-center gap-3">
                 <button id="close-chat" class="p-2 -ml-2 text-slate-400"><i data-lucide="chevron-down"></i></button>
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs" id="chat-avatar">?</div>
+                <img id="chat-avatar-img" class="w-8 h-8 rounded-full hidden object-cover border border-white/10">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs" id="chat-avatar-fallback">?</div>
                 <div>
-                    <h4 id="chat-username" class="font-bold text-sm leading-none">User</h4>
+                    <h4 id="chat-username" class="font-bold text-sm leading-none flex items-center gap-2">User</h4>
                     <p id="chat-subtitle" class="text-[9px] text-emerald-400 mt-1 uppercase font-black tracking-widest">Active Connection</p>
                 </div>
             </div>
-            <button id="call-btn" class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="phone" class="w-4 h-4"></i></button>
+            <div class="flex items-center gap-1">
+                <button id="add-friend-btn" class="hidden w-9 h-9 bg-slate-800 text-pink-400 rounded-full flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
+                <button id="call-btn" class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center active:scale-90 transition-transform"><i data-lucide="phone" class="w-4 h-4"></i></button>
+            </div>
         </div>
         
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col no-scrollbar"></div>
         
-        <!-- Attachment Tray -->
         <div id="attach-tray" class="hidden absolute bottom-20 left-4 bg-slate-800 p-2 rounded-2xl shadow-2xl border border-white/10 flex gap-2 z-50">
             <button id="tray-file-btn" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-colors"><i data-lucide="file" class="w-5 h-5"></i></button>
             <button id="tray-gif-btn" class="p-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white shadow-lg shadow-indigo-600/20 transition-colors"><i data-lucide="image" class="w-5 h-5"></i></button>
@@ -217,40 +190,50 @@
                 <input id="gif-search" type="text" class="w-full bg-transparent outline-none text-sm" placeholder="Search Tenor GIFs...">
             </div>
         </div>
-        <div id="gif-results" class="flex-1 overflow-y-auto p-4 no-scrollbar gif-grid">
-            <!-- GIFs inject here -->
-            <div class="col-span-2 text-center text-slate-500 text-xs py-10">Type to search...</div>
-        </div>
-        <!-- Tenor branding requirement -->
+        <div id="gif-results" class="flex-1 overflow-y-auto p-4 no-scrollbar gif-grid"></div>
         <div class="p-2 text-center border-t border-white/5"><img src="https://tenor.com/assets/img/tenor-logo-white.svg" class="h-4 mx-auto opacity-50" alt="Powered by Tenor"></div>
     </div>
 
-    <!-- Login -->
+    <!-- Master Login / Auth -->
     <div id="login-overlay" class="fixed inset-0 z-[100] hidden bg-slate-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
         <div class="w-16 h-16 bg-gradient-to-tr from-pink-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl pulse-ring">
             <i data-lucide="radio" class="w-8 h-8 text-white"></i>
         </div>
-        <h2 class="text-2xl font-black mb-1 tracking-tighter">WebLink</h2>
-        <p class="text-slate-500 text-[11px] uppercase tracking-widest mb-10">Private Discovery</p>
-        <form id="login-form" class="w-full max-w-xs space-y-3">
-            <input type="text" id="username-input" required maxlength="12" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-4 text-center text-lg font-bold outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your Name">
-            <button type="submit" class="w-full py-4 bg-white text-black font-black rounded-xl active:scale-95 transition-transform uppercase tracking-widest text-[10px]">Initialize</button>
+        <h2 class="text-3xl font-black mb-1 tracking-tighter">WebLink <span class="text-pink-500">V4</span></h2>
+        <p class="text-slate-500 text-[11px] uppercase tracking-widest mb-10">P2P Network & Friends</p>
+        
+        <div class="w-full max-w-xs space-y-4">
+            <button id="google-login-btn" class="w-full py-4 bg-white text-black font-black rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-3 shadow-lg">
+                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                Continue with Google
+            </button>
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-slate-800"></div>
+                <span class="flex-shrink-0 mx-4 text-slate-600 text-xs font-bold uppercase">or</span>
+                <div class="flex-grow border-t border-slate-800"></div>
+            </div>
+            <button id="guest-login-btn" class="w-full py-4 bg-slate-900 border border-white/10 text-white font-bold rounded-xl active:scale-95 transition-transform text-xs uppercase tracking-widest">
+                Play as Guest
+            </button>
+        </div>
+    </div>
+
+    <!-- Account Creation (Google First-time) -->
+    <div id="username-overlay" class="fixed inset-0 z-[105] hidden bg-slate-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
+        <h2 class="text-2xl font-black mb-2">Create Profile</h2>
+        <p class="text-slate-500 text-xs mb-8">Choose a unique handle for WebLink</p>
+        <form id="username-form" class="w-full max-w-xs space-y-3">
+            <input type="text" id="new-username-input" required maxlength="15" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-4 text-center text-lg font-bold outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Username">
+            <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-xl active:scale-95 transition-transform uppercase tracking-widest text-[10px]">Save Profile</button>
         </form>
     </div>
 
-    <!-- Group/Multi Call Overlay -->
+    <!-- Call Overlay -->
     <div id="call-overlay" class="fixed inset-0 z-[110] hidden bg-slate-950/98 backdrop-blur-3xl p-6 flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar">
-        <!-- Container for dynamically added audio elements -->
         <div id="call-audio-container" class="hidden"></div>
-        
         <h3 id="call-name" class="text-2xl font-black text-center mt-10">Call</h3>
         <p id="call-status" class="text-slate-500 font-medium tracking-widest uppercase text-[10px] -mt-6">Connecting...</p>
-
-        <!-- Grid for Avatars (supports multiple for groups) -->
-        <div id="call-avatars" class="flex flex-wrap justify-center gap-6 max-w-sm py-8">
-            <!-- Dynamic Avatars Inject Here -->
-        </div>
-        
+        <div id="call-avatars" class="flex flex-wrap justify-center gap-6 max-w-sm py-8"></div>
         <div class="flex gap-8 pt-8 pb-10">
             <button id="end-call-btn" class="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-2xl shadow-rose-600/30 active:scale-90 transition-transform"><i data-lucide="phone-off" class="w-6 h-6 text-white"></i></button>
             <button id="accept-call-btn" class="hidden w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-600/30 active:scale-90 transition-transform"><i data-lucide="phone" class="w-6 h-6 text-white"></i></button>
@@ -261,8 +244,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Config ---
         const firebaseConfig = {
@@ -277,171 +260,192 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const APP_ID = "weblink-v3";
-        const TENOR_API_KEY = "LIVDSRZULELA"; // Standard public test key for Tenor V1 API
+        const APP_ID = "weblink-v4";
+        const TENOR_API_KEY = "LIVDSRZULELA"; 
 
         // --- State ---
         let myUsername = "";
+        let myAvatarUrl = null;
+        let myPublicIp = "local_only";
+        let isGuest = false;
+        
         let peer = null;
         let myPeerId = null;
         let my6DigitCode = "";
         
-        let networkUsers = [];
-        let activeGroups = {}; // Local cache of joined groups { groupId: { name, members } }
-        let chatHistories = {}; // { targetId: [msg] }
+        let viewMode = 'local'; // 'local' or 'friends'
+        let networkUsers = []; // unfiltered raw presence
+        let myFriends = []; // List of friend objects {uid, username, peerId}
+        let activeGroups = {}; 
+        let chatHistories = {}; 
         
-        let currentChatTarget = null; // Either a peerId (string) or a groupId (string starting with 'G-')
+        let currentChatTarget = null; // target peerId or groupId
+        let currentChatUserObj = null; // ref to user object for adding friend
         
         let localStream = null;
-        let activeCalls = []; // Array to support group calls
+        let activeCalls = []; 
 
-        // --- DOM Cache ---
         const els = {
-            bootOverlay: document.getElementById('boot-overlay'),
-            bootProgress: document.getElementById('boot-progress'),
-            bootText: document.getElementById('boot-text'),
-            loginOverlay: document.getElementById('login-overlay'),
-            loginForm: document.getElementById('login-form'),
-            usernameInput: document.getElementById('username-input'),
-            myUsernameDisplay: document.getElementById('my-username-display'),
-            myProfile: document.getElementById('my-profile'),
-            usersGrid: document.getElementById('users-grid'),
-            groupsGrid: document.getElementById('groups-grid'),
-            emptyState: document.getElementById('empty-state'),
-            networkCount: document.getElementById('network-count'),
-            createGroupBtn: document.getElementById('create-group-btn'),
-            pairingBtn: document.getElementById('pairing-btn'),
-            pairingModal: document.getElementById('pairing-modal'),
-            closePairing: document.getElementById('close-pairing'),
-            pairingCodeText: document.getElementById('pairing-code-text'),
-            targetCodeInput: document.getElementById('target-code-input'),
-            connectCodeBtn: document.getElementById('connect-code-btn'),
-            chatPanel: document.getElementById('chat-panel'),
-            closeChat: document.getElementById('close-chat'),
-            chatUsername: document.getElementById('chat-username'),
-            chatSubtitle: document.getElementById('chat-subtitle'),
-            chatAvatar: document.getElementById('chat-avatar'),
-            chatMessages: document.getElementById('chat-messages'),
-            messageInput: document.getElementById('message-input'),
-            sendBtn: document.getElementById('send-btn'),
-            attachBtn: document.getElementById('attach-btn'),
-            attachTray: document.getElementById('attach-tray'),
-            trayFileBtn: document.getElementById('tray-file-btn'),
-            trayGifBtn: document.getElementById('tray-gif-btn'),
-            fileInput: document.getElementById('file-input'),
-            gifModal: document.getElementById('gif-modal'),
-            closeGif: document.getElementById('close-gif'),
-            gifSearch: document.getElementById('gif-search'),
-            gifResults: document.getElementById('gif-results'),
-            callBtn: document.getElementById('call-btn'),
-            callOverlay: document.getElementById('call-overlay'),
-            callName: document.getElementById('call-name'),
-            callStatus: document.getElementById('call-status'),
-            callAvatars: document.getElementById('call-avatars'),
-            callAudioContainer: document.getElementById('call-audio-container'),
-            acceptCallBtn: document.getElementById('accept-call-btn'),
-            endCallBtn: document.getElementById('end-call-btn'),
+            bootOverlay: document.getElementById('boot-overlay'), bootProgress: document.getElementById('boot-progress'), bootText: document.getElementById('boot-text'),
+            loginOverlay: document.getElementById('login-overlay'), guestLoginBtn: document.getElementById('guest-login-btn'), googleLoginBtn: document.getElementById('google-login-btn'),
+            usernameOverlay: document.getElementById('username-overlay'), usernameForm: document.getElementById('username-form'), newUsernameInput: document.getElementById('new-username-input'),
+            myUsernameDisplay: document.getElementById('my-username-display'), myProfile: document.getElementById('my-profile'), myAvatarImg: document.getElementById('my-avatar-img'), myAvatarFallback: document.getElementById('my-avatar-fallback'),
+            tabLocal: document.getElementById('tab-local'), tabFriends: document.getElementById('tab-friends'), friendCount: document.getElementById('friend-count'),
+            viewTitle: document.getElementById('view-title'), emptyTitle: document.getElementById('empty-title'), emptySub: document.getElementById('empty-sub'),
+            usersGrid: document.getElementById('users-grid'), groupsGrid: document.getElementById('groups-grid'), emptyState: document.getElementById('empty-state'), networkCount: document.getElementById('network-count'),
+            createGroupBtn: document.getElementById('create-group-btn'), pairingBtn: document.getElementById('pairing-btn'), pairingModal: document.getElementById('pairing-modal'), closePairing: document.getElementById('close-pairing'), pairingCodeText: document.getElementById('pairing-code-text'), targetCodeInput: document.getElementById('target-code-input'), connectCodeBtn: document.getElementById('connect-code-btn'),
+            chatPanel: document.getElementById('chat-panel'), closeChat: document.getElementById('close-chat'), chatUsername: document.getElementById('chat-username'), chatSubtitle: document.getElementById('chat-subtitle'), chatAvatarFallback: document.getElementById('chat-avatar-fallback'), chatAvatarImg: document.getElementById('chat-avatar-img'), addFriendBtn: document.getElementById('add-friend-btn'), chatMessages: document.getElementById('chat-messages'), messageInput: document.getElementById('message-input'), sendBtn: document.getElementById('send-btn'), attachBtn: document.getElementById('attach-btn'), attachTray: document.getElementById('attach-tray'), trayFileBtn: document.getElementById('tray-file-btn'), trayGifBtn: document.getElementById('tray-gif-btn'), fileInput: document.getElementById('file-input'),
+            gifModal: document.getElementById('gif-modal'), closeGif: document.getElementById('close-gif'), gifSearch: document.getElementById('gif-search'), gifResults: document.getElementById('gif-results'),
+            callBtn: document.getElementById('call-btn'), callOverlay: document.getElementById('call-overlay'), callName: document.getElementById('call-name'), callStatus: document.getElementById('call-status'), callAvatars: document.getElementById('call-avatars'), callAudioContainer: document.getElementById('call-audio-container'), acceptCallBtn: document.getElementById('accept-call-btn'), endCallBtn: document.getElementById('end-call-btn'),
             toastContainer: document.getElementById('toast-container')
         };
 
-        // --- 1. Bootloader System ---
-        async function runBootSequence() {
-            els.bootProgress.style.width = '100%';
-            
-            // Check for updates virtually
-            const updates = ['update_1', 'update_2', 'update_3'];
-            for (let u of updates) {
-                try {
-                    els.bootText.textContent = `Fetching ${u}.js...`;
-                    await new Promise(r => {
-                        let s = document.createElement('script');
-                        s.src = `updates/${u}.js`;
-                        s.onload = r; s.onerror = r; 
-                        document.head.appendChild(s);
-                        setTimeout(r, 600); // minimum delay for visual effect
-                    });
-                } catch(e){}
-            }
-            
-            els.bootText.textContent = "System Ready.";
-            
-            setTimeout(() => {
-                els.bootOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    els.bootOverlay.classList.add('hidden');
-                    // Show login if no username
-                    if (!myUsername) {
-                        els.loginOverlay.style.display = 'flex';
-                        setTimeout(() => els.loginOverlay.style.opacity = '1', 50);
-                    }
-                }, 1000);
-            }, 800);
-        }
-
-        // --- Utils ---
         function showToast(msg, type = 'info') {
             const t = document.createElement('div');
             t.className = `p-3 rounded-xl ${type === 'error' ? 'bg-rose-500' : 'bg-slate-800'} text-white text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 pointer-events-auto`;
             t.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}" class="w-3 h-3"></i> ${msg}`;
-            els.toastContainer.appendChild(t);
-            lucide.createIcons();
+            els.toastContainer.appendChild(t); lucide.createIcons();
             setTimeout(() => t.remove(), 3500);
         }
 
-        // --- Initialization ---
-        async function start() {
-            runBootSequence(); // Start the bootloader UI
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, u => { if(u && myUsername) setupDiscovery(); });
+        // --- IP Fetch for True Local Discovery ---
+        async function fetchPublicIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                myPublicIp = data.ip;
+                console.log("Local Node IP:", myPublicIp);
+            } catch(e) { console.warn("IP fetch failed, falling back to open local mode"); }
         }
 
-        els.loginForm.onsubmit = e => {
-            e.preventDefault();
-            myUsername = els.usernameInput.value.trim();
-            els.loginOverlay.style.opacity = '0';
-            setTimeout(() => els.loginOverlay.style.display = 'none', 500);
-            els.myProfile.classList.remove('hidden');
-            els.myUsernameDisplay.textContent = myUsername;
-            initPeer();
+        // --- Boot & Auth ---
+        async function start() {
+            runBootSequence();
+            await fetchPublicIP();
+            
+            onAuthStateChanged(auth, async (user) => {
+                if (user && myUsername) {
+                    setupDiscovery();
+                    if (!isGuest) fetchFriends();
+                }
+            });
+        }
+
+        async function runBootSequence() {
+            els.bootProgress.style.width = '100%';
+            const updates = ['update_1', 'update_2'];
+            for (let u of updates) {
+                try {
+                    els.bootText.textContent = `Injecting Core v4...`;
+                    await new Promise(r => setTimeout(r, 600));
+                } catch(e){}
+            }
+            els.bootText.textContent = "System Ready.";
+            setTimeout(() => {
+                els.bootOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    els.bootOverlay.classList.add('hidden');
+                    if (!myUsername) { els.loginOverlay.style.display = 'flex'; }
+                }, 1000);
+            }, 800);
+        }
+
+        // Guest Login
+        els.guestLoginBtn.onclick = async () => {
+            isGuest = true;
+            myUsername = "Guest_" + Math.floor(100 + Math.random() * 900);
+            await signInAnonymously(auth);
+            finalizeLogin();
         };
 
+        // Google Login
+        els.googleLoginBtn.onclick = async () => {
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                isGuest = false;
+                myAvatarUrl = result.user.photoURL;
+                
+                // Check if profile exists
+                const profRef = doc(db, 'artifacts', APP_ID, 'users', result.user.uid, 'profile');
+                const snap = await getDoc(profRef);
+                
+                if (snap.exists()) {
+                    myUsername = snap.data().username;
+                    finalizeLogin();
+                } else {
+                    // New user, pick username
+                    els.loginOverlay.style.display = 'none';
+                    els.usernameOverlay.style.display = 'flex';
+                }
+            } catch(e) { showToast("Sign in failed", "error"); }
+        };
+
+        // Create Profile
+        els.usernameForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = els.newUsernameInput.value.trim();
+            if(!name || !auth.currentUser) return;
+            
+            myUsername = name;
+            const profRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'profile');
+            await setDoc(profRef, { username: myUsername, photoURL: myAvatarUrl, uid: auth.currentUser.uid });
+            
+            els.usernameOverlay.style.display = 'none';
+            finalizeLogin();
+        };
+
+        function finalizeLogin() {
+            els.loginOverlay.style.display = 'none';
+            els.myProfile.classList.remove('hidden');
+            
+            if (myAvatarUrl) {
+                els.myAvatarImg.src = myAvatarUrl;
+                els.myAvatarImg.classList.remove('hidden');
+                els.myAvatarFallback.classList.add('hidden');
+            } else {
+                els.myAvatarFallback.textContent = myUsername[0].toUpperCase();
+            }
+            initPeer();
+        }
+
+        // --- Network & PeerJS ---
         function initPeer() {
             peer = new Peer(undefined, { debug: 1 });
             peer.on('open', id => {
                 myPeerId = id;
                 my6DigitCode = Math.floor(100000 + Math.random() * 900000).toString();
                 els.pairingCodeText.textContent = my6DigitCode;
-                new QRCode(document.getElementById("qrcode"), {
-                    text: `${window.location.origin}${window.location.pathname}?code=${my6DigitCode}`, 
-                    width: 120, height: 120, colorDark : "#0f172a", colorLight : "#ffffff"
-                });
+                new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?code=${my6DigitCode}`, width: 120, height: 120, colorDark : "#0f172a", colorLight : "#ffffff" });
                 
-                announce();
-                setInterval(announce, 15000);
-                setupDiscovery(); // Start scanning
+                announcePresence();
+                setInterval(announcePresence, 15000);
+                setupDiscovery();
                 
-                // Auto-join via URL param
                 const params = new URLSearchParams(window.location.search);
                 if(params.get('code')) connectByCode(params.get('code'));
             });
 
-            peer.on('connection', conn => {
-                conn.on('data', data => handleIncomingData(conn.peer, data));
-            });
-
+            peer.on('connection', conn => conn.on('data', data => handleIncomingData(conn.peer, data)));
             peer.on('call', call => handleIncomingCall(call));
+
+            // Clean presence on close
+            window.addEventListener('beforeunload', () => {
+                if(auth.currentUser && myPeerId) {
+                    deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
+                }
+            });
         }
 
-        async function announce() {
+        async function announcePresence() {
             if(!auth.currentUser || !myPeerId) return;
             const pRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid);
-            await setDoc(pRef, { uid: auth.currentUser.uid, username: myUsername, peerId: myPeerId, code: my6DigitCode, ts: Date.now() });
+            await setDoc(pRef, { uid: auth.currentUser.uid, username: myUsername, peerId: myPeerId, code: my6DigitCode, ip: myPublicIp, avatar: myAvatarUrl, ts: Date.now() });
             
             const lRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', my6DigitCode);
-            await setDoc(lRef, { type: 'user', peerId: myPeerId, username: myUsername, ts: Date.now() });
+            await setDoc(lRef, { type: 'user', peerId: myPeerId, username: myUsername, uid: auth.currentUser.uid, avatar: myAvatarUrl, ts: Date.now() });
         }
 
-        // --- Discovery & Group Handling ---
         function setupDiscovery() {
             const col = collection(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence');
             onSnapshot(col, snap => {
@@ -449,162 +453,202 @@
                 networkUsers = [];
                 snap.forEach(d => {
                     const data = d.data();
-                    if(data.uid !== auth.currentUser.uid && (now - data.ts < 45000)) networkUsers.push(data);
+                    // Keep if not me AND recently seen
+                    if(data.uid !== auth.currentUser.uid && (now - data.ts < 45000)) {
+                        networkUsers.push(data);
+                    }
                 });
                 renderNetwork();
             });
         }
 
-        els.createGroupBtn.onclick = async () => {
-            const gCode = "G-" + Math.floor(10000 + Math.random() * 90000).toString();
-            const gRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', gCode);
-            
-            const groupData = {
-                id: gCode,
-                name: `Group ${gCode}`,
-                members: [{ peerId: myPeerId, username: myUsername }],
-                ts: Date.now()
-            };
-            
-            await setDoc(gRef, groupData);
-            
-            // Register lookup
-            const lRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', gCode);
-            await setDoc(lRef, { type: 'group', groupId: gCode, ts: Date.now() });
-            
-            showToast(`Group Created: ${gCode}`);
-            joinLocalGroup(groupData);
-            openChat(gCode, groupData.name, true);
-        };
-
-        function joinLocalGroup(groupData) {
-            activeGroups[groupData.id] = groupData;
-            
-            // Listen for others joining
-            const gRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', groupData.id);
-            onSnapshot(gRef, snap => {
-                if(snap.exists()) {
-                    activeGroups[groupData.id] = snap.data();
-                    if(currentChatTarget === groupData.id) renderSubtitle();
-                }
+        function fetchFriends() {
+            const fCol = collection(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friends');
+            onSnapshot(fCol, snap => {
+                myFriends = [];
+                snap.forEach(d => myFriends.push(d.data()));
+                els.friendCount.textContent = myFriends.length;
+                renderNetwork();
             });
+        }
+
+        // --- UI Rendering ---
+        els.tabLocal.onclick = () => { viewMode = 'local'; updateTabs(); };
+        els.tabFriends.onclick = () => { viewMode = 'friends'; updateTabs(); };
+
+        function updateTabs() {
+            if (viewMode === 'local') {
+                els.tabLocal.className = "tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
+                els.tabFriends.className = "tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
+                els.viewTitle.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Nearby Devices`;
+                els.emptyTitle.textContent = "Scanning network...";
+                els.emptySub.textContent = "Only showing devices on your WiFi";
+                els.groupsGrid.style.display = 'grid';
+            } else {
+                els.tabLocal.className = "tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
+                els.tabFriends.className = "tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
+                els.viewTitle.innerHTML = `<i data-lucide="users" class="w-3 h-3 text-pink-500"></i> My Friends`;
+                els.emptyTitle.textContent = "No friends online.";
+                els.emptySub.textContent = "Add friends via Pairing Code";
+                els.groupsGrid.style.display = 'none';
+            }
             renderNetwork();
         }
 
         function renderNetwork() {
-            els.networkCount.textContent = `${networkUsers.length} PEERS`;
-            els.emptyState.style.display = (networkUsers.length || Object.keys(activeGroups).length) ? 'none' : 'flex';
-            
-            // Render Groups
-            els.groupsGrid.innerHTML = '';
-            Object.values(activeGroups).forEach(g => {
-                const c = document.createElement('div');
-                c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-pink-500/20 bg-pink-900/10";
-                c.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-pink-600/20 flex items-center justify-center font-bold text-xs text-pink-400"><i data-lucide="users" class="w-4 h-4"></i></div>
-                        <div>
-                            <p class="font-bold text-sm leading-tight text-pink-100">${g.name}</p>
-                            <p class="text-[9px] text-pink-400/80 font-bold uppercase tracking-widest">${g.members.length} Members</p>
-                        </div>
-                    </div>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-pink-500"></i>
-                `;
-                c.onclick = () => openChat(g.id, g.name, true);
-                els.groupsGrid.appendChild(c);
-            });
-
-            // Render Users
             els.usersGrid.innerHTML = '';
-            networkUsers.forEach(u => {
+            
+            // Filter logic
+            let displayUsers = [];
+            if (viewMode === 'local') {
+                // TRUE LOCAL DISCOVERY: Exact IP match
+                displayUsers = networkUsers.filter(u => u.ip === myPublicIp);
+            } else {
+                // FRIENDS: Check if UID is in myFriends array
+                displayUsers = networkUsers.filter(u => myFriends.some(f => f.uid === u.uid));
+            }
+
+            els.networkCount.textContent = `${displayUsers.length} ONLINE`;
+            const hasGroups = viewMode === 'local' && Object.keys(activeGroups).length > 0;
+            els.emptyState.style.display = (displayUsers.length || hasGroups) ? 'none' : 'flex';
+
+            // Groups (Only in Local view for now)
+            if (viewMode === 'local') {
+                els.groupsGrid.innerHTML = '';
+                Object.values(activeGroups).forEach(g => {
+                    const c = document.createElement('div');
+                    c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-pink-500/20 bg-pink-900/10";
+                    c.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-pink-600/20 flex items-center justify-center text-pink-400"><i data-lucide="users" class="w-4 h-4"></i></div>
+                            <div>
+                                <p class="font-bold text-sm text-pink-100">${g.name}</p>
+                                <p class="text-[9px] text-pink-400/80 font-bold uppercase tracking-widest">${g.members.length} Members</p>
+                            </div>
+                        </div>
+                    `;
+                    c.onclick = () => openChat(g.id, g.name, null, true);
+                    els.groupsGrid.appendChild(c);
+                });
+            }
+
+            // Users
+            displayUsers.forEach(u => {
                 const c = document.createElement('div');
                 c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-white/5";
+                
+                let avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-9 h-9 rounded-full object-cover">` : `<div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-400">${u.username[0].toUpperCase()}</div>`;
+                
                 c.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-400">${u.username[0].toUpperCase()}</div>
+                        ${avatarHtml}
                         <div>
                             <p class="font-bold text-sm leading-tight">${u.username}</p>
                             <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">ID: ${u.code}</p>
                         </div>
                     </div>
-                    <i data-lucide="arrow-right" class="w-4 h-4 text-slate-700"></i>
                 `;
-                c.onclick = () => openChat(u.peerId, u.username, false);
+                c.onclick = () => openChat(u.peerId, u.username, u, false);
                 els.usersGrid.appendChild(c);
             });
             lucide.createIcons();
         }
 
-        // --- Pairing Logic ---
+        // --- Groups & Pairing ---
+        els.createGroupBtn.onclick = async () => {
+            const gCode = "G-" + Math.floor(10000 + Math.random() * 90000).toString();
+            const groupData = { id: gCode, name: `Mesh ${gCode}`, members: [{ peerId: myPeerId, username: myUsername }], ts: Date.now() };
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', gCode), groupData);
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', gCode), { type: 'group', groupId: gCode, ts: Date.now() });
+            
+            joinLocalGroup(groupData);
+            openChat(gCode, groupData.name, null, true);
+        };
+
+        function joinLocalGroup(gData) {
+            activeGroups[gData.id] = gData;
+            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', gData.id), snap => {
+                if(snap.exists()) {
+                    activeGroups[gData.id] = snap.data();
+                    if(currentChatTarget === gData.id) updateChatHeader();
+                }
+            });
+            renderNetwork();
+        }
+
         els.pairingBtn.onclick = () => els.pairingModal.classList.remove('hidden');
         els.closePairing.onclick = () => els.pairingModal.classList.add('hidden');
-        els.connectCodeBtn.onclick = () => connectByCode(els.targetCodeInput.value.trim().toUpperCase());
-
-        async function connectByCode(code) {
+        els.connectCodeBtn.onclick = async () => {
+            const code = els.targetCodeInput.value.trim().toUpperCase();
             if(!code) return showToast("Enter code", "error");
-            showToast("Resolving link...");
             
             const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', code));
             if(snap.exists()) {
                 const data = snap.data();
-                
                 if (data.type === 'group') {
-                    // Join Group
-                    const gRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', data.groupId);
-                    const gSnap = await getDoc(gRef);
+                    const gSnap = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', data.groupId));
                     if (gSnap.exists()) {
                         const gData = gSnap.data();
-                        // Add self to array
-                        const newMember = { peerId: myPeerId, username: myUsername };
-                        const isMember = gData.members.find(m => m.peerId === myPeerId);
-                        if (!isMember) {
-                            await updateDoc(gRef, { members: arrayUnion(newMember) });
-                            gData.members.push(newMember);
+                        if (!gData.members.find(m => m.peerId === myPeerId)) {
+                            await updateDoc(gSnap.ref, { members: arrayUnion({ peerId: myPeerId, username: myUsername }) });
+                            gData.members.push({ peerId: myPeerId, username: myUsername });
                         }
                         joinLocalGroup(gData);
-                        openChat(gData.id, gData.name, true);
-                        showToast(`Joined ${gData.name}`);
+                        openChat(gData.id, gData.name, null, true);
                     }
                 } else {
-                    // Direct User Link
-                    openChat(data.peerId, data.username, false);
-                    showToast("Linked to User!");
+                    openChat(data.peerId, data.username, data, false);
                 }
                 els.pairingModal.classList.add('hidden');
                 els.targetCodeInput.value = '';
-            } else {
-                showToast("Code not found", "error");
-            }
-        }
+            } else { showToast("Code not found", "error"); }
+        };
 
-        // --- Chat Interface ---
-        function renderSubtitle() {
+        // --- Chat & Friends ---
+        function updateChatHeader() {
             if (currentChatTarget && currentChatTarget.startsWith('G-')) {
-                const grp = activeGroups[currentChatTarget];
-                els.chatSubtitle.textContent = grp ? `${grp.members.length} MEMBERS IN MESH` : 'GROUP MESH';
-                els.chatAvatar.innerHTML = `<i data-lucide="users" class="w-4 h-4"></i>`;
-                els.chatAvatar.className = "w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white";
+                els.chatSubtitle.textContent = `${activeGroups[currentChatTarget]?.members.length || 0} IN MESH`;
+                els.chatAvatarFallback.innerHTML = `<i data-lucide="users" class="w-4 h-4"></i>`;
+                els.chatAvatarFallback.className = "w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white";
+                els.chatAvatarFallback.classList.remove('hidden'); els.chatAvatarImg.classList.add('hidden');
+                els.addFriendBtn.classList.add('hidden');
             } else {
-                els.chatSubtitle.textContent = "P2P DIRECT ENCRYPTED";
-                els.chatAvatar.innerHTML = els.chatUsername.textContent[0].toUpperCase();
-                els.chatAvatar.className = "w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs";
+                els.chatSubtitle.textContent = "P2P ENCRYPTED";
+                if(currentChatUserObj && currentChatUserObj.avatar) {
+                    els.chatAvatarImg.src = currentChatUserObj.avatar;
+                    els.chatAvatarImg.classList.remove('hidden'); els.chatAvatarFallback.classList.add('hidden');
+                } else {
+                    els.chatAvatarFallback.innerHTML = els.chatUsername.textContent[0].toUpperCase();
+                    els.chatAvatarFallback.className = "w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs";
+                    els.chatAvatarFallback.classList.remove('hidden'); els.chatAvatarImg.classList.add('hidden');
+                }
+                
+                // Show Add Friend button if not guest, not group, and not already friend
+                if (!isGuest && currentChatUserObj && currentChatUserObj.uid) {
+                    const isFr = myFriends.some(f => f.uid === currentChatUserObj.uid);
+                    els.addFriendBtn.classList.toggle('hidden', isFr);
+                } else { els.addFriendBtn.classList.add('hidden'); }
             }
             lucide.createIcons();
         }
 
-        function openChat(targetId, name, isGroup) {
+        function openChat(targetId, name, userObj, isGroup) {
             currentChatTarget = targetId;
+            currentChatUserObj = userObj;
             els.chatUsername.textContent = name;
-            renderSubtitle();
-            
+            updateChatHeader();
             els.chatPanel.style.transform = 'translateY(0)';
             renderMsgs();
         }
 
-        els.closeChat.onclick = () => { 
-            els.chatPanel.style.transform = 'translateY(100%)'; 
-            currentChatTarget = null; 
-            els.attachTray.classList.add('hidden');
+        els.closeChat.onclick = () => { els.chatPanel.style.transform = 'translateY(100%)'; currentChatTarget = null; els.attachTray.classList.add('hidden'); };
+
+        els.addFriendBtn.onclick = async () => {
+            if(!currentChatUserObj || !currentChatUserObj.uid || isGuest) return;
+            const fRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friends', currentChatUserObj.uid);
+            await setDoc(fRef, { uid: currentChatUserObj.uid, username: currentChatUserObj.username, addedTs: Date.now() });
+            showToast(`${currentChatUserObj.username} added to friends!`);
+            updateChatHeader();
         };
 
         // --- Messaging ---
@@ -616,43 +660,34 @@
         };
 
         function sendPayload(payload) {
-            const fullMsg = { ...payload, sender: myPeerId, senderName: myUsername, ts: Date.now() };
-            
+            const msg = { ...payload, sender: myPeerId, senderName: myUsername, ts: Date.now() };
             if (currentChatTarget.startsWith('G-')) {
-                fullMsg.groupId = currentChatTarget;
+                msg.groupId = currentChatTarget;
                 const grp = activeGroups[currentChatTarget];
                 if(grp) {
                     grp.members.forEach(m => {
-                        if (m.peerId !== myPeerId) {
-                            const conn = peer.connect(m.peerId);
-                            conn.on('open', () => conn.send(fullMsg));
-                        }
+                        if (m.peerId !== myPeerId) { const c = peer.connect(m.peerId); c.on('open', () => c.send(msg)); }
                     });
                 }
-                saveMsg(currentChatTarget, { ...fullMsg, isMe: true });
+                saveMsg(currentChatTarget, { ...msg, isMe: true });
             } else {
-                const conn = peer.connect(currentChatTarget);
-                conn.on('open', () => conn.send(fullMsg));
-                saveMsg(currentChatTarget, { ...fullMsg, isMe: true });
+                const c = peer.connect(currentChatTarget);
+                c.on('open', () => c.send(msg));
+                saveMsg(currentChatTarget, { ...msg, isMe: true });
             }
         }
 
-        function handleIncomingData(fromPeerId, data) {
-            const target = data.groupId ? data.groupId : fromPeerId;
-            saveMsg(target, { ...data, isMe: false });
-            
-            if (currentChatTarget === target) {
-                renderMsgs();
-            } else {
-                const name = data.groupId ? (activeGroups[data.groupId]?.name || 'Group') : (data.senderName || 'Peer');
-                showToast(`New message in ${name}`);
-            }
+        function handleIncomingData(pid, data) {
+            const t = data.groupId ? data.groupId : pid;
+            saveMsg(t, { ...data, isMe: false });
+            if (currentChatTarget === t) renderMsgs();
+            else showToast(`New message from ${data.groupId ? 'Group' : data.senderName}`);
         }
 
-        function saveMsg(targetId, msg) {
-            if(!chatHistories[targetId]) chatHistories[targetId] = [];
-            chatHistories[targetId].push(msg);
-            if(currentChatTarget === targetId) renderMsgs();
+        function saveMsg(tid, msg) {
+            if(!chatHistories[tid]) chatHistories[tid] = [];
+            chatHistories[tid].push(msg);
+            if(currentChatTarget === tid) renderMsgs();
         }
 
         function renderMsgs() {
@@ -661,97 +696,48 @@
             msgs.forEach(m => {
                 const div = document.createElement('div');
                 div.className = `max-w-[85%] px-4 py-3 rounded-2xl text-[13px] flex flex-col ${m.isMe ? 'bg-indigo-600 self-end rounded-br-none' : 'bg-slate-800 self-start rounded-bl-none border border-white/5'}`;
-                
-                let header = '';
-                if (!m.isMe && currentChatTarget.startsWith('G-')) {
-                    header = `<span class="text-[9px] font-black uppercase tracking-widest text-indigo-300 mb-1">${m.senderName}</span>`;
-                }
-
-                let content = '';
-                if (m.type === 'text') {
-                    content = `<span>${m.content}</span>`;
-                } else if (m.type === 'gif') {
-                    content = `<img src="${m.url}" class="rounded-lg mt-1 max-h-48 object-cover">`;
-                } else if (m.type === 'file') {
-                    // Blob reconstruction not fully supported in mesh without blobbing to all, simulated link
-                    content = `<span class="italic text-slate-400">File attached: ${m.filename}</span>`; 
-                }
-
-                div.innerHTML = header + content;
+                let head = (!m.isMe && currentChatTarget.startsWith('G-')) ? `<span class="text-[9px] font-black uppercase tracking-widest text-indigo-300 mb-1">${m.senderName}</span>` : '';
+                let cont = m.type === 'text' ? `<span>${m.content}</span>` : m.type === 'gif' ? `<img src="${m.url}" class="rounded-lg mt-1 max-h-48 object-cover">` : `<span class="italic text-slate-400">File attached: ${m.filename}</span>`; 
+                div.innerHTML = head + cont;
                 els.chatMessages.appendChild(div);
             });
             els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
         }
 
-        // --- Attachments & GIF (Tenor) ---
+        // --- Attachments & GIF ---
         els.attachBtn.onclick = () => els.attachTray.classList.toggle('hidden');
-        
-        els.trayFileBtn.onclick = () => {
-            els.attachTray.classList.add('hidden');
-            els.fileInput.click();
-        };
-
+        els.trayFileBtn.onclick = () => { els.attachTray.classList.add('hidden'); els.fileInput.click(); };
         els.fileInput.onchange = (e) => {
             const f = e.target.files[0];
-            if(f) {
-                showToast("File sending simulated for mesh network", "info");
-                sendPayload({ type: 'file', filename: f.name });
-            }
+            if(f) { showToast("File simulated", "info"); sendPayload({ type: 'file', filename: f.name }); }
         };
-
         els.trayGifBtn.onclick = () => {
-            els.attachTray.classList.add('hidden');
-            els.gifModal.classList.remove('hidden');
+            els.attachTray.classList.add('hidden'); els.gifModal.classList.remove('hidden');
             setTimeout(() => els.gifModal.style.transform = 'translateY(0)', 10);
-            fetchGifs('trending'); // Load initial
+            fetchGifs('trending');
         };
+        els.closeGif.onclick = () => { els.gifModal.style.transform = 'translateY(100%)'; setTimeout(() => els.gifModal.classList.add('hidden'), 300); };
+        let gTimer; els.gifSearch.onkeyup = (e) => { clearTimeout(gTimer); gTimer = setTimeout(() => fetchGifs(e.target.value.trim() || 'trending'), 500); };
 
-        els.closeGif.onclick = () => {
-            els.gifModal.style.transform = 'translateY(100%)';
-            setTimeout(() => els.gifModal.classList.add('hidden'), 300);
-        };
-
-        let gifTimer;
-        els.gifSearch.onkeyup = (e) => {
-            clearTimeout(gifTimer);
-            gifTimer = setTimeout(() => {
-                const q = e.target.value.trim();
-                fetchGifs(q || 'trending');
-            }, 500);
-        };
-
-        async function fetchGifs(query) {
-            els.gifResults.innerHTML = '<div class="col-span-2 text-center text-slate-500 text-xs py-10"><i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto"></i></div>';
-            lucide.createIcons();
+        async function fetchGifs(q) {
+            els.gifResults.innerHTML = '<div class="col-span-2 text-center text-slate-500 py-10"><i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto"></i></div>'; lucide.createIcons();
             try {
-                const endpoint = query === 'trending' ? 'trending' : 'search';
-                const res = await fetch(`https://g.tenor.com/v1/${endpoint}?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&limit=20`);
+                const res = await fetch(`https://g.tenor.com/v1/${q==='trending'?'trending':'search'}?q=${encodeURIComponent(q)}&key=${TENOR_API_KEY}&limit=20`);
                 const data = await res.json();
-                
                 els.gifResults.innerHTML = '';
-                data.results.forEach(gif => {
-                    const img = document.createElement('img');
-                    img.src = gif.media[0].tinygif.url; // Use smaller version for grid
-                    img.onclick = () => {
-                        sendPayload({ type: 'gif', url: gif.media[0].gif.url });
-                        els.closeGif.onclick();
-                    };
+                data.results.forEach(g => {
+                    const img = document.createElement('img'); img.src = g.media[0].tinygif.url;
+                    img.onclick = () => { sendPayload({ type: 'gif', url: g.media[0].gif.url }); els.closeGif.onclick(); };
                     els.gifResults.appendChild(img);
                 });
-            } catch (err) {
-                els.gifResults.innerHTML = '<div class="col-span-2 text-center text-rose-500 text-xs py-10">Failed to load GIFs</div>';
-            }
+            } catch (e) { els.gifResults.innerHTML = '<div class="col-span-2 text-center text-rose-500 text-xs py-10">Failed to load GIFs</div>'; }
         }
 
-        // --- Multi-Party Calling ---
-        function createAvatarNode(id, name) {
-            const el = document.createElement('div');
-            el.id = `avatar-${id}`;
+        // --- Calling ---
+        function getAvatarNode(id, name) {
+            const el = document.createElement('div'); el.id = `avatar-${id}`;
             el.className = "w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-2xl font-bold border-2 border-indigo-500 pulse-ring relative";
-            el.innerHTML = `
-                ${name[0].toUpperCase()}
-                <div class="absolute -bottom-2 bg-slate-900 px-2 py-0.5 rounded text-[8px] uppercase tracking-widest border border-white/10 whitespace-nowrap">${name}</div>
-            `;
+            el.innerHTML = `${name[0].toUpperCase()}<div class="absolute -bottom-2 bg-slate-900 px-2 py-0.5 rounded text-[8px] uppercase tracking-widest border border-white/10 whitespace-nowrap">${name}</div>`;
             return el;
         }
 
@@ -759,110 +745,64 @@
             if(!currentChatTarget) return;
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                els.callOverlay.classList.remove('hidden');
-                els.callAvatars.innerHTML = ''; // Clear grid
-                els.callAudioContainer.innerHTML = ''; 
+                els.callOverlay.classList.remove('hidden'); els.callAvatars.innerHTML = ''; els.callAudioContainer.innerHTML = ''; 
                 
                 if (currentChatTarget.startsWith('G-')) {
-                    // Group Call
                     els.callName.textContent = activeGroups[currentChatTarget]?.name || "Group Call";
-                    els.callStatus.textContent = "Initiating Mesh Call...";
-                    
+                    els.callStatus.textContent = "Mesh Call";
                     const grp = activeGroups[currentChatTarget];
-                    if(grp) {
-                        grp.members.forEach(m => {
-                            if (m.peerId !== myPeerId) {
-                                els.callAvatars.appendChild(createAvatarNode(m.peerId, m.username));
-                                const call = peer.call(m.peerId, localStream);
-                                setupCallEvents(call, m.peerId);
-                            }
-                        });
-                    }
+                    if(grp) grp.members.forEach(m => {
+                        if (m.peerId !== myPeerId) {
+                            els.callAvatars.appendChild(getAvatarNode(m.peerId, m.username));
+                            const call = peer.call(m.peerId, localStream); setupCallEvents(call, m.peerId);
+                        }
+                    });
                 } else {
-                    // Direct Call
-                    els.callName.textContent = els.chatUsername.textContent;
-                    els.callStatus.textContent = "Calling...";
-                    els.callAvatars.appendChild(createAvatarNode(currentChatTarget, els.chatUsername.textContent));
-                    
-                    const call = peer.call(currentChatTarget, localStream);
-                    setupCallEvents(call, currentChatTarget);
+                    els.callName.textContent = els.chatUsername.textContent; els.callStatus.textContent = "Calling...";
+                    els.callAvatars.appendChild(getAvatarNode(currentChatTarget, els.chatUsername.textContent));
+                    const call = peer.call(currentChatTarget, localStream); setupCallEvents(call, currentChatTarget);
                 }
-            } catch (e) {
-                showToast("Microphone access denied", "error");
-            }
+            } catch (e) { showToast("Mic denied", "error"); }
         };
 
         function handleIncomingCall(call) {
-            activeCalls.push(call);
-            els.callOverlay.classList.remove('hidden');
-            
-            const callerName = networkUsers.find(u => u.peerId === call.peer)?.username || "Unknown";
-            els.callName.textContent = callerName;
-            els.callStatus.textContent = "Incoming Call";
-            
-            els.callAvatars.innerHTML = '';
-            els.callAvatars.appendChild(createAvatarNode(call.peer, callerName));
+            activeCalls.push(call); els.callOverlay.classList.remove('hidden');
+            const cName = networkUsers.find(u => u.peerId === call.peer)?.username || "Unknown";
+            els.callName.textContent = cName; els.callStatus.textContent = "Incoming Call";
+            els.callAvatars.innerHTML = ''; els.callAvatars.appendChild(getAvatarNode(call.peer, cName));
             els.acceptCallBtn.classList.remove('hidden');
         }
 
         els.acceptCallBtn.onclick = async () => {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                els.acceptCallBtn.classList.add('hidden');
-                els.callStatus.textContent = "Live Mesh Connected";
-                
-                activeCalls.forEach(call => {
-                    call.answer(localStream);
-                    setupCallEvents(call, call.peer);
-                });
-            } catch(e) {
-                showToast("Microphone required to answer", "error");
-                endCall();
-            }
+                els.acceptCallBtn.classList.add('hidden'); els.callStatus.textContent = "Live Audio";
+                activeCalls.forEach(c => { c.answer(localStream); setupCallEvents(c, c.peer); });
+            } catch(e) { showToast("Mic required", "error"); endCall(); }
         };
 
         function setupCallEvents(call, peerId) {
             activeCalls.push(call);
-            call.on('stream', rStream => {
-                els.callStatus.textContent = "Live Audio Active";
-                
-                // Ensure avatar is solid
-                const av = document.getElementById(`avatar-${peerId}`);
-                if(av) av.classList.add('border-emerald-500');
-
-                // Create dedicated audio node for this stream
-                const audioNode = document.createElement('audio');
-                audioNode.autoplay = true;
-                audioNode.srcObject = rStream;
-                audioNode.id = `audio-${peerId}`;
-                els.callAudioContainer.appendChild(audioNode);
+            call.on('stream', r => {
+                els.callStatus.textContent = "Active";
+                const av = document.getElementById(`avatar-${peerId}`); if(av) av.classList.add('border-emerald-500');
+                const aNode = document.createElement('audio'); aNode.autoplay = true; aNode.srcObject = r; aNode.id = `audio-${peerId}`;
+                els.callAudioContainer.appendChild(aNode);
             });
-            
             call.on('close', () => {
-                const audio = document.getElementById(`audio-${peerId}`);
-                if(audio) audio.remove();
-                const av = document.getElementById(`avatar-${peerId}`);
-                if(av) av.remove();
-                
-                activeCalls = activeCalls.filter(c => c !== call);
-                if(activeCalls.length === 0) endCall();
+                document.getElementById(`audio-${peerId}`)?.remove(); document.getElementById(`avatar-${peerId}`)?.remove();
+                activeCalls = activeCalls.filter(c => c !== call); if(activeCalls.length === 0) endCall();
             });
         }
 
         function endCall() {
-            activeCalls.forEach(c => c.close());
-            activeCalls = [];
+            activeCalls.forEach(c => c.close()); activeCalls = [];
             if(localStream) localStream.getTracks().forEach(t => t.stop());
-            els.callOverlay.classList.add('hidden');
-            els.callAudioContainer.innerHTML = '';
-            els.callAvatars.innerHTML = '';
-            els.acceptCallBtn.classList.add('hidden');
+            els.callOverlay.classList.add('hidden'); els.callAudioContainer.innerHTML = ''; els.callAvatars.innerHTML = ''; els.acceptCallBtn.classList.add('hidden');
         }
         els.endCallBtn.onclick = endCall;
 
-        // Startup
-        start();
-        lucide.createIcons();
+        start(); lucide.createIcons();
     </script>
 </body>
 </html>
