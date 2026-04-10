@@ -3,132 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WebLink by Skye &lt;3</title>
+    <title>WebLink by Skye</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zinc: { 850: '#1f1f22', 950: '#09090b' }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        
         :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
         body { padding-top: var(--sat); padding-bottom: var(--sab); -webkit-tap-highlight-color: transparent; }
         .h-screen-ios { height: 100vh; height: -webkit-fill-available; }
         
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .pairing-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98)); max-width: calc(100vw - 32px); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
         
-        #qrcode img { margin: 0 auto; border-radius: 12px; padding: 6px; background: white; max-width: 130px; height: auto; }
-        
-        .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
-            70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
-        }
-        
+        .glass-panel { background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .progress-bar-fill { transition: width 3.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .tab-active { color: #fff; border-bottom: 2px solid #fff; }
+        .tab-inactive { color: #52525b; border-bottom: 2px solid transparent; }
+        
+        #qrcode img { margin: 0 auto; border-radius: 8px; padding: 8px; background: white; max-width: 140px; }
+
+        /* Pure CSS 3D Cube Animation for Bootloader */
+        .cube-scene { width: 80px; height: 80px; perspective: 400px; margin: 0 auto; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: cube-rotate 4s infinite linear; }
+        .cube-face { position: absolute; width: 80px; height: 80px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+        .cube-face.front  { transform: rotateY(  0deg) translateZ(40px); }
+        .cube-face.right  { transform: rotateY( 90deg) translateZ(40px); }
+        .cube-face.back   { transform: rotateY(180deg) translateZ(40px); }
+        .cube-face.left   { transform: rotateY(-90deg) translateZ(40px); }
+        .cube-face.top    { transform: rotateX( 90deg) translateZ(40px); }
+        .cube-face.bottom { transform: rotateX(-90deg) translateZ(40px); }
+        @keyframes cube-rotate { 
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); } 
+            100% { transform: rotateX(360deg) rotateY(720deg) rotateZ(180deg); } 
+        }
+        
         .gif-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .gif-grid img { width: 100%; border-radius: 8px; cursor: pointer; transition: transform 0.2s; }
         .gif-grid img:active { transform: scale(0.95); }
-
-        .tab-active { color: #fff; border-bottom: 2px solid #ec4899; }
-        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
     </style>
 </head>
-<body class="h-screen-ios bg-slate-950 text-slate-100 font-sans overflow-hidden flex flex-col relative">
+<body class="h-screen-ios bg-zinc-950 text-zinc-100 font-sans overflow-hidden flex flex-col relative selection:bg-zinc-800">
 
-    <div id="boot-overlay" class="fixed inset-0 z-[200] bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-1000">
-        <i data-lucide="radio" class="w-14 h-14 text-pink-500 animate-pulse mb-6 pulse-ring rounded-full"></i>
-        <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 tracking-[0.2em] uppercase mb-12">WebLink</h1>
-        <div class="flex flex-col items-center space-y-4 w-64">
-            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                <div id="boot-progress" class="h-full bg-gradient-to-r from-pink-500 to-indigo-500 w-0 progress-bar-fill"></div>
+    <!-- Bootloader / Loading Screen -->
+    <div id="boot-overlay" class="fixed inset-0 z-[200] bg-zinc-950 flex flex-col items-center justify-center transition-opacity duration-1000">
+        <div class="w-full max-w-sm h-48 flex items-center justify-center mb-2 pointer-events-none opacity-80">
+            <div class="cube-scene">
+                <div class="cube">
+                    <div class="cube-face front"></div><div class="cube-face back"></div>
+                    <div class="cube-face right"></div><div class="cube-face left"></div>
+                    <div class="cube-face top"></div><div class="cube-face bottom"></div>
+                </div>
             </div>
-            <p id="boot-text" class="text-[10px] text-slate-500 font-mono tracking-widest uppercase text-center h-4">Initializing Core...</p>
         </div>
+        <p class="text-xs text-zinc-500 font-mono tracking-[0.3em] uppercase">loading core...</p>
     </div>
 
-    <div class="fixed inset-0 pointer-events-none z-0">
-        <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-pink-600/10 rounded-full blur-[120px]"></div>
-        <div class="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
-    </div>
-
-    <header class="sticky top-0 p-4 glass-panel flex flex-col z-40 border-b border-white/5 space-y-3">
+    <!-- Minimal Header -->
+    <header class="sticky top-0 p-4 glass-panel flex flex-col z-40 border-b border-zinc-900 space-y-4">
         <div class="flex justify-between items-center w-full">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20">
-                    <i data-lucide="radio" class="w-5 h-5 text-white"></i>
-                </div>
-                <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-pink-300 to-indigo-300 bg-clip-text text-transparent">WebLink</h1>
+                <i data-lucide="radio" class="w-5 h-5 text-white"></i>
+                <h1 class="text-lg font-black tracking-tighter">WebLink</h1>
             </div>
             
             <div class="flex items-center gap-2">
-                <button id="create-group-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Create Group">
-                    <i data-lucide="users" class="w-5 h-5 text-pink-300"></i>
+                <button id="create-group-btn" class="flex items-center gap-2 px-3 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors border border-zinc-800 text-xs font-bold uppercase tracking-wider text-zinc-300">
+                    <i data-lucide="users" class="w-4 h-4"></i> Create Group
                 </button>
-                <button id="pairing-btn" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors border border-white/5" title="Pair Device">
-                    <i data-lucide="qr-code" class="w-5 h-5 text-indigo-300"></i>
+                <button id="pairing-btn" class="p-2 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors border border-zinc-800" title="Pair Device">
+                    <i data-lucide="qr-code" class="w-4 h-4 text-zinc-300"></i>
                 </button>
-                <div id="my-profile" class="hidden flex items-center gap-2 bg-slate-900/50 px-2 py-1.5 rounded-full border border-white/10 ml-1">
-                    <img id="my-avatar-img" class="w-6 h-6 rounded-full hidden bg-slate-800 object-cover">
-                    <div id="my-avatar-fallback" class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">?</div>
-                    <button id="sign-out-btn" class="ml-1 px-1 text-slate-400 hover:text-rose-400 transition-colors" title="Sign Out">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                <div id="my-profile" class="hidden flex items-center gap-2 bg-zinc-900 px-2 py-1.5 rounded-lg border border-zinc-800 ml-1">
+                    <img id="my-avatar-img" class="w-6 h-6 rounded-md hidden object-cover">
+                    <div id="my-avatar-fallback" class="w-6 h-6 rounded-md bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400">?</div>
+                    <button id="sign-out-btn" class="px-1 text-zinc-500 hover:text-white transition-colors" title="Sign Out">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </div>
         </div>
         
-        <div class="flex w-full gap-4 px-1">
-            <button id="tab-local" class="tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Local WiFi</button>
-            <button id="tab-friends" class="tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center">Friends <span id="friend-count" class="ml-1 text-[9px] bg-slate-800 px-1.5 rounded-full">0</span></button>
+        <!-- Navigation Tabs (Updated with Games) -->
+        <div class="flex w-full gap-2 px-1">
+            <button id="tab-local" class="tab-active text-[10px] sm:text-xs font-bold uppercase tracking-widest pb-3 transition-colors flex-1 text-center">Local WiFi</button>
+            <button id="tab-friends" class="tab-inactive text-[10px] sm:text-xs font-bold uppercase tracking-widest pb-3 transition-colors flex-1 text-center flex justify-center items-center gap-1.5">
+                Friends <span id="request-badge" class="hidden bg-white text-black px-1.5 rounded-full text-[9px] font-black">0</span>
+            </button>
+            <button id="tab-games" class="tab-inactive text-[10px] sm:text-xs font-bold uppercase tracking-widest pb-3 transition-colors flex-1 text-center">Mini-Games</button>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative z-10">
+    <!-- Main Feed -->
+    <main class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 relative z-10 bg-zinc-950">
         <div class="max-w-2xl mx-auto space-y-4">
-            <div class="flex items-center justify-between px-1 mb-2">
-                <h2 id="view-title" class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            
+            <div id="network-header" class="flex items-center justify-between px-1 mb-2">
+                <h2 id="view-title" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                     Nearby Devices
                 </h2>
-                <span id="network-count" class="text-[10px] font-bold text-slate-400">0 PEERS</span>
+                <span id="network-count" class="text-[10px] font-bold text-zinc-600 font-mono">0 PEERS</span>
             </div>
 
-            <div id="groups-grid" class="grid grid-cols-1 gap-3 empty:hidden mb-2"></div>
-            <div id="users-grid" class="grid grid-cols-1 gap-3"></div>
+            <!-- Friend Requests Section -->
+            <div id="requests-section" class="hidden space-y-2 mb-6">
+                <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Incoming Requests</h3>
+                <div id="requests-grid" class="grid grid-cols-1 gap-2 empty:hidden"></div>
+            </div>
 
-            <div id="empty-state" class="flex flex-col items-center justify-center py-16 text-slate-500 space-y-4">
-                <i data-lucide="radar" class="w-10 h-10 text-slate-800 animate-spin-slow"></i>
-                <div class="text-center">
-                    <p id="empty-title" class="text-sm font-medium">Scanning network...</p>
-                    <p id="empty-sub" class="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">Only showing devices on your WiFi</p>
+            <!-- Active Groups List -->
+            <div id="groups-grid" class="grid grid-cols-1 gap-2 empty:hidden mb-4"></div>
+            <!-- Active Users List -->
+            <div id="users-grid" class="grid grid-cols-1 gap-2"></div>
+
+            <!-- Mini-Games Section -->
+            <div id="games-section" class="hidden space-y-4">
+                <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Game Library</h3>
+                <div id="games-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Game cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="flex flex-col items-center justify-center py-20 space-y-4">
+                <div class="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <i data-lucide="radar" class="w-8 h-8 text-zinc-600 animate-spin-slow"></i>
+                </div>
+                <div class="text-center space-y-1">
+                    <p id="empty-title" class="text-sm font-medium text-zinc-300">Scanning network...</p>
+                    <p id="empty-sub" class="text-xs text-zinc-600">Waiting for peers to join your local node.</p>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Game Player Overlay -->
+    <div id="game-player-overlay" class="fixed inset-0 z-[150] hidden bg-zinc-950 flex-col">
+        <div class="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between z-10 shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <i data-lucide="gamepad-2" class="w-4 h-4 text-white"></i>
+                </div>
+                <h3 id="playing-game-title" class="text-sm font-bold text-white tracking-wide">Emulator</h3>
+            </div>
+            <button id="close-game-btn" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors text-xs font-bold uppercase tracking-widest text-zinc-300 active:scale-95">Close Game</button>
+        </div>
+        <div class="flex-1 w-full bg-black relative">
+            <!-- Iframe that loads the games from the GitHub repository /games directory -->
+            <iframe id="game-iframe" src="" class="w-full h-full border-none absolute inset-0 bg-black" allow="fullscreen; gamepad; autoplay"></iframe>
+        </div>
+    </div>
+
     <!-- Pairing Modal -->
-    <div id="pairing-modal" class="fixed inset-0 z-[60] hidden bg-slate-950/90 backdrop-blur-xl p-4 flex items-center justify-center">
-        <div class="pairing-card w-full rounded-[28px] p-5 border border-white/10 shadow-2xl flex flex-col space-y-5">
+    <div id="pairing-modal" class="fixed inset-0 z-[60] hidden bg-zinc-950/95 backdrop-blur-sm p-4 flex items-center justify-center">
+        <div class="w-full max-w-sm bg-zinc-900 rounded-2xl p-6 border border-zinc-800 shadow-2xl flex flex-col space-y-6">
             <div class="flex justify-between items-center">
-                <h3 class="text-lg font-black tracking-tight">Pairing Center</h3>
-                <button id="close-pairing" class="p-2 bg-slate-800 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <h3 class="text-base font-bold">Pairing Center</h3>
+                <button id="close-pairing" class="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-md transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             <div class="space-y-4 text-center">
-                <div id="qrcode" class="mx-auto p-2 bg-white rounded-xl inline-block shadow-lg"></div>
-                <div class="space-y-0.5">
-                    <p class="text-[9px] text-slate-500 uppercase font-black tracking-widest">Your Code</p>
-                    <div id="pairing-code-text" class="text-3xl font-black tracking-[0.2em] text-indigo-400 font-mono">------</div>
+                <div id="qrcode" class="mx-auto p-2 bg-white rounded-xl inline-block shadow-sm"></div>
+                <div class="space-y-1">
+                    <p class="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">Your Code</p>
+                    <div id="pairing-code-text" class="text-3xl font-black tracking-[0.2em] text-white font-mono">------</div>
                 </div>
-                <div class="pt-4 border-t border-white/5 space-y-3">
-                    <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Link Code / Group Code</p>
+                <div class="pt-6 border-t border-zinc-800 space-y-3">
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-left">Link Code / Group Code</p>
                     <div class="flex flex-col gap-2">
-                        <input type="text" id="target-code-input" maxlength="8" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-[0.3em] focus:ring-2 focus:ring-pink-500 outline-none uppercase placeholder:tracking-normal placeholder:text-slate-700" placeholder="000000">
-                        <button id="connect-code-btn" class="w-full bg-indigo-600 py-3 rounded-xl font-black hover:bg-indigo-500 active:scale-[0.97] transition-all text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20">Confirm Link</button>
+                        <input type="text" id="target-code-input" maxlength="8" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-center text-lg font-mono tracking-widest focus:border-white outline-none uppercase placeholder:tracking-normal placeholder:text-zinc-700 transition-colors" placeholder="000000">
+                        <button id="connect-code-btn" class="w-full bg-white text-black py-3 rounded-lg font-bold hover:bg-zinc-200 active:scale-[0.98] transition-all text-xs uppercase tracking-widest">Confirm Link</button>
                     </div>
                 </div>
             </div>
@@ -136,105 +200,112 @@
     </div>
 
     <!-- Chat Slide-over -->
-    <div id="chat-panel" class="fixed inset-0 z-50 transform translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col bg-slate-950">
-        <div class="p-4 glass-panel border-b border-white/5 flex items-center justify-between sticky top-0">
+    <div id="chat-panel" class="fixed inset-0 z-50 transform translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col bg-zinc-950">
+        <div class="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between sticky top-0">
             <div class="flex items-center gap-3">
-                <button id="close-chat" class="p-2 -ml-2 text-slate-400"><i data-lucide="chevron-down"></i></button>
-                <img id="chat-avatar-img" class="w-8 h-8 rounded-full hidden object-cover border border-white/10">
-                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs" id="chat-avatar-fallback">?</div>
+                <button id="close-chat" class="p-2 -ml-2 text-zinc-400 hover:text-white transition-colors"><i data-lucide="chevron-down"></i></button>
+                <img id="chat-avatar-img" class="w-8 h-8 rounded-md hidden object-cover border border-zinc-800">
+                <div class="w-8 h-8 rounded-md bg-zinc-800 flex items-center justify-center font-bold text-xs" id="chat-avatar-fallback">?</div>
                 <div>
                     <h4 id="chat-username" class="font-bold text-sm leading-none flex items-center gap-2">User</h4>
-                    <p id="chat-subtitle" class="text-[9px] text-emerald-400 mt-1 uppercase font-black tracking-widest">Active Connection</p>
+                    <p id="chat-subtitle" class="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-widest font-mono">Active Connection</p>
                 </div>
             </div>
-            <div class="flex items-center gap-1">
-                <button id="add-friend-btn" class="hidden w-9 h-9 bg-slate-800 text-pink-400 rounded-full flex items-center justify-center active:scale-90 transition-transform" title="Add Friend"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
-                <button id="call-btn" class="w-9 h-9 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center active:scale-90 transition-transform" title="Audio Call"><i data-lucide="phone" class="w-4 h-4"></i></button>
+            <div class="flex items-center gap-2">
+                <button id="add-friend-btn" class="hidden px-3 py-2 bg-white text-black rounded-md flex items-center gap-2 text-xs font-bold active:scale-95 transition-transform" title="Add Friend">
+                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add
+                </button>
+                <button id="leave-group-btn" class="hidden px-3 py-2 bg-rose-500/10 text-rose-500 rounded-md flex items-center gap-2 text-xs font-bold active:scale-95 transition-transform">
+                    Exit
+                </button>
+                <button id="call-btn" class="w-9 h-9 bg-zinc-800 hover:bg-zinc-700 text-white rounded-md flex items-center justify-center active:scale-95 transition-all" title="Audio Call">
+                    <i data-lucide="phone" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
         
         <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col no-scrollbar"></div>
         
-        <div id="attach-tray" class="hidden absolute bottom-20 left-4 bg-slate-800 p-2 rounded-2xl shadow-2xl border border-white/10 flex gap-2 z-50">
-            <button id="tray-file-btn" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-colors"><i data-lucide="file" class="w-5 h-5"></i></button>
-            <button id="tray-gif-btn" class="p-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white shadow-lg shadow-indigo-600/20 transition-colors"><i data-lucide="image" class="w-5 h-5"></i></button>
+        <div id="attach-tray" class="hidden absolute bottom-20 left-4 bg-zinc-900 p-2 rounded-xl shadow-2xl border border-zinc-800 flex gap-2 z-50">
+            <button id="tray-file-btn" class="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white transition-colors"><i data-lucide="file" class="w-4 h-4"></i></button>
+            <button id="tray-gif-btn" class="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white transition-colors"><i data-lucide="image" class="w-4 h-4"></i></button>
         </div>
 
-        <div class="p-3 pb-8 border-t border-white/5 bg-slate-900/50 flex gap-2 items-center relative">
-            <button id="attach-btn" class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 shrink-0"><i data-lucide="plus"></i></button>
+        <div class="p-3 pb-8 border-t border-zinc-800 bg-zinc-950 flex gap-2 items-center relative">
+            <button id="attach-btn" class="w-10 h-10 bg-zinc-900 hover:bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 transition-colors shrink-0 border border-zinc-800"><i data-lucide="plus" class="w-4 h-4"></i></button>
             <input type="file" id="file-input" class="hidden">
-            <div class="flex-1 bg-slate-950 border border-white/10 rounded-2xl px-4 py-3">
-                <input id="message-input" type="text" class="w-full bg-transparent outline-none text-sm" placeholder="Message...">
+            <div class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 focus-within:border-zinc-600 transition-colors">
+                <input id="message-input" type="text" class="w-full bg-transparent outline-none text-sm placeholder:text-zinc-600" placeholder="Type a message...">
             </div>
-            <button id="send-btn" class="w-12 h-12 bg-pink-600 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-600/20 active:scale-90 transition-transform shrink-0"><i data-lucide="send" class="w-5 h-5"></i></button>
+            <button id="send-btn" class="w-10 h-10 bg-white text-black hover:bg-zinc-200 rounded-lg flex items-center justify-center active:scale-95 transition-transform shrink-0"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
     </div>
 
     <!-- GIF Modal -->
-    <div id="gif-modal" class="fixed inset-0 z-[70] hidden bg-slate-950/98 backdrop-blur-3xl flex flex-col transform translate-y-full transition-transform duration-300">
-        <div class="p-4 glass-panel border-b border-white/5 flex items-center gap-3">
-            <button id="close-gif" class="p-2 -ml-2 text-slate-400"><i data-lucide="x"></i></button>
-            <div class="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2">
-                <i data-lucide="search" class="w-4 h-4 text-slate-500"></i>
+    <div id="gif-modal" class="fixed inset-0 z-[70] hidden bg-zinc-950 flex flex-col transform translate-y-full transition-transform duration-300">
+        <div class="p-4 bg-zinc-900 border-b border-zinc-800 flex items-center gap-3">
+            <button id="close-gif" class="p-2 -ml-2 text-zinc-400 hover:text-white"><i data-lucide="x"></i></button>
+            <div class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 flex items-center gap-2">
+                <i data-lucide="search" class="w-4 h-4 text-zinc-500"></i>
                 <input id="gif-search" type="text" class="w-full bg-transparent outline-none text-sm" placeholder="Search Tenor GIFs...">
             </div>
         </div>
         <div id="gif-results" class="flex-1 overflow-y-auto p-4 no-scrollbar gif-grid"></div>
-        <div class="p-2 text-center border-t border-white/5"><img src="https://tenor.com/assets/img/tenor-logo-white.svg" class="h-4 mx-auto opacity-50" alt="Powered by Tenor"></div>
+        <div class="p-3 text-center bg-zinc-900 border-t border-zinc-800"><img src="https://tenor.com/assets/img/tenor-logo-white.svg" class="h-4 mx-auto opacity-50" alt="Powered by Tenor"></div>
     </div>
 
     <!-- Master Login / Auth -->
-    <div id="login-overlay" class="fixed inset-0 z-[100] hidden bg-slate-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
-        <div class="w-16 h-16 bg-gradient-to-tr from-pink-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl pulse-ring">
-            <i data-lucide="radio" class="w-8 h-8 text-white"></i>
+    <div id="login-overlay" class="fixed inset-0 z-[100] hidden bg-zinc-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
+        <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-xl">
+            <i data-lucide="radio" class="w-8 h-8 text-black"></i>
         </div>
-        <h2 class="text-3xl font-black mb-1 tracking-tighter">WebLink <span class="text-pink-500">V4</span></h2>
-        <p class="text-slate-500 text-[11px] uppercase tracking-widest mb-10">P2P Network & Friends</p>
+        <h2 class="text-3xl font-black mb-1 tracking-tighter">WebLink</h2>
+        <p class="text-zinc-500 text-xs font-mono mb-12">P2P Network Engine</p>
         
-        <div class="w-full max-w-xs space-y-4">
-            <button id="google-login-btn" class="w-full py-4 bg-white text-black font-black rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-3 shadow-lg">
-                <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        <div class="w-full max-w-xs space-y-3">
+            <button id="google-login-btn" class="w-full py-3.5 bg-white text-black font-bold rounded-xl active:scale-[0.98] transition-transform flex items-center justify-center gap-3 text-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Continue with Google
             </button>
             <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-slate-800"></div>
-                <span class="flex-shrink-0 mx-4 text-slate-600 text-xs font-bold uppercase">or</span>
-                <div class="flex-grow border-t border-slate-800"></div>
+                <div class="flex-grow border-t border-zinc-800"></div>
+                <span class="flex-shrink-0 mx-4 text-zinc-600 text-[10px] font-bold uppercase tracking-widest">or</span>
+                <div class="flex-grow border-t border-zinc-800"></div>
             </div>
-            <button id="guest-login-btn" class="w-full py-4 bg-slate-900 border border-white/10 text-white font-bold rounded-xl active:scale-95 transition-transform text-xs uppercase tracking-widest">
+            <button id="guest-login-btn" class="w-full py-3.5 bg-zinc-900 border border-zinc-800 text-white font-bold rounded-xl active:scale-[0.98] transition-transform text-xs uppercase tracking-widest hover:bg-zinc-800">
                 Use as Guest
             </button>
         </div>
     </div>
 
     <!-- Account Creation (Google First-time) -->
-    <div id="username-overlay" class="fixed inset-0 z-[105] hidden bg-slate-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
+    <div id="username-overlay" class="fixed inset-0 z-[105] hidden bg-zinc-950 flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
         <h2 class="text-2xl font-black mb-2">Create Profile</h2>
-        <p class="text-slate-500 text-xs mb-8">Choose a unique handle for WebLink</p>
+        <p class="text-zinc-500 text-xs mb-8">Choose a unique handle for WebLink</p>
         <form id="username-form" class="w-full max-w-xs space-y-3">
-            <input type="text" id="new-username-input" required maxlength="15" class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-4 text-center text-lg font-bold outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Username">
-            <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-xl active:scale-95 transition-transform uppercase tracking-widest text-[10px]">Save Profile</button>
+            <input type="text" id="new-username-input" required maxlength="15" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3.5 text-center text-lg font-bold outline-none focus:border-white transition-colors" placeholder="Username">
+            <button type="submit" class="w-full py-3.5 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform uppercase tracking-widest text-xs">Save Profile</button>
         </form>
     </div>
 
     <!-- Call Overlay -->
-    <div id="call-overlay" class="fixed inset-0 z-[110] hidden bg-slate-950/98 backdrop-blur-3xl p-6 flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar">
+    <div id="call-overlay" class="fixed inset-0 z-[110] hidden bg-zinc-950/98 backdrop-blur-md p-6 flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar">
         <div id="call-audio-container" class="hidden"></div>
         <h3 id="call-name" class="text-2xl font-black text-center mt-10">Call</h3>
-        <p id="call-status" class="text-slate-500 font-medium tracking-widest uppercase text-[10px] -mt-6">Connecting...</p>
-        <div id="call-avatars" class="flex flex-wrap justify-center gap-6 max-w-sm py-8"></div>
+        <p id="call-status" class="text-zinc-500 font-medium tracking-widest uppercase text-[10px] -mt-6 font-mono">Connecting...</p>
+        <div id="call-avatars" class="flex flex-wrap justify-center gap-4 max-w-sm py-8"></div>
         <div class="flex gap-8 pt-8 pb-10">
-            <button id="end-call-btn" class="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-2xl shadow-rose-600/30 active:scale-90 transition-transform"><i data-lucide="phone-off" class="w-6 h-6 text-white"></i></button>
-            <button id="accept-call-btn" class="hidden w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-600/30 active:scale-90 transition-transform"><i data-lucide="phone" class="w-6 h-6 text-white"></i></button>
+            <button id="end-call-btn" class="w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i data-lucide="phone-off" class="w-6 h-6 text-white"></i></button>
+            <button id="accept-call-btn" class="hidden w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform"><i data-lucide="phone" class="w-6 h-6 text-black"></i></button>
         </div>
     </div>
 
-    <div id="toast-container" class="fixed top-4 left-4 right-4 z-[120] space-y-2 pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-4 left-4 right-4 z-[120] space-y-2 pointer-events-none flex flex-col items-center"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Config ---
         const firebaseConfig = {
@@ -249,7 +320,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const APP_ID = "weblink-v4";
+        const APP_ID = "weblink-v6"; // Bumped for new structural integrity
         const TENOR_API_KEY = "LIVDSRZULELA"; 
 
         // --- State ---
@@ -262,28 +333,30 @@
         let myPeerId = null;
         let my6DigitCode = "";
         
-        let viewMode = 'local'; // 'local' or 'friends'
-        let networkUsers = []; // unfiltered raw presence
-        let myFriends = []; // List of friend objects {uid, username, peerId}
+        let viewMode = 'local'; // 'local' | 'friends' | 'games'
+        let networkUsers = [];
+        let myFriends = [];
+        let incomingRequests = [];
         let activeGroups = {}; 
         let chatHistories = {}; 
         
-        let currentChatTarget = null; // target peerId or groupId
-        let currentChatUserObj = null; // ref to user object for adding friend
+        let currentChatTarget = null;
+        let currentChatUserObj = null;
         
         let localStream = null;
         let activeCalls = []; 
 
         const els = {
-            bootOverlay: document.getElementById('boot-overlay'), bootProgress: document.getElementById('boot-progress'), bootText: document.getElementById('boot-text'),
+            bootOverlay: document.getElementById('boot-overlay'),
             loginOverlay: document.getElementById('login-overlay'), guestLoginBtn: document.getElementById('guest-login-btn'), googleLoginBtn: document.getElementById('google-login-btn'),
             usernameOverlay: document.getElementById('username-overlay'), usernameForm: document.getElementById('username-form'), newUsernameInput: document.getElementById('new-username-input'),
-            myUsernameDisplay: document.getElementById('my-username-display'), myProfile: document.getElementById('my-profile'), myAvatarImg: document.getElementById('my-avatar-img'), myAvatarFallback: document.getElementById('my-avatar-fallback'), signOutBtn: document.getElementById('sign-out-btn'),
-            tabLocal: document.getElementById('tab-local'), tabFriends: document.getElementById('tab-friends'), friendCount: document.getElementById('friend-count'),
-            viewTitle: document.getElementById('view-title'), emptyTitle: document.getElementById('empty-title'), emptySub: document.getElementById('empty-sub'),
-            usersGrid: document.getElementById('users-grid'), groupsGrid: document.getElementById('groups-grid'), emptyState: document.getElementById('empty-state'), networkCount: document.getElementById('network-count'),
+            myProfile: document.getElementById('my-profile'), myAvatarImg: document.getElementById('my-avatar-img'), myAvatarFallback: document.getElementById('my-avatar-fallback'), signOutBtn: document.getElementById('sign-out-btn'),
+            tabLocal: document.getElementById('tab-local'), tabFriends: document.getElementById('tab-friends'), tabGames: document.getElementById('tab-games'), requestBadge: document.getElementById('request-badge'),
+            viewTitle: document.getElementById('view-title'), emptyTitle: document.getElementById('empty-title'), emptySub: document.getElementById('empty-sub'), emptyState: document.getElementById('empty-state'), networkHeader: document.getElementById('network-header'),
+            usersGrid: document.getElementById('users-grid'), groupsGrid: document.getElementById('groups-grid'), requestsSection: document.getElementById('requests-section'), requestsGrid: document.getElementById('requests-grid'), networkCount: document.getElementById('network-count'),
+            gamesSection: document.getElementById('games-section'), gamesGrid: document.getElementById('games-grid'), gamePlayerOverlay: document.getElementById('game-player-overlay'), gameIframe: document.getElementById('game-iframe'), closeGameBtn: document.getElementById('close-game-btn'), playingGameTitle: document.getElementById('playing-game-title'),
             createGroupBtn: document.getElementById('create-group-btn'), pairingBtn: document.getElementById('pairing-btn'), pairingModal: document.getElementById('pairing-modal'), closePairing: document.getElementById('close-pairing'), pairingCodeText: document.getElementById('pairing-code-text'), targetCodeInput: document.getElementById('target-code-input'), connectCodeBtn: document.getElementById('connect-code-btn'),
-            chatPanel: document.getElementById('chat-panel'), closeChat: document.getElementById('close-chat'), chatUsername: document.getElementById('chat-username'), chatSubtitle: document.getElementById('chat-subtitle'), chatAvatarFallback: document.getElementById('chat-avatar-fallback'), chatAvatarImg: document.getElementById('chat-avatar-img'), addFriendBtn: document.getElementById('add-friend-btn'), chatMessages: document.getElementById('chat-messages'), messageInput: document.getElementById('message-input'), sendBtn: document.getElementById('send-btn'), attachBtn: document.getElementById('attach-btn'), attachTray: document.getElementById('attach-tray'), trayFileBtn: document.getElementById('tray-file-btn'), trayGifBtn: document.getElementById('tray-gif-btn'), fileInput: document.getElementById('file-input'),
+            chatPanel: document.getElementById('chat-panel'), closeChat: document.getElementById('close-chat'), chatUsername: document.getElementById('chat-username'), chatSubtitle: document.getElementById('chat-subtitle'), chatAvatarFallback: document.getElementById('chat-avatar-fallback'), chatAvatarImg: document.getElementById('chat-avatar-img'), addFriendBtn: document.getElementById('add-friend-btn'), leaveGroupBtn: document.getElementById('leave-group-btn'), chatMessages: document.getElementById('chat-messages'), messageInput: document.getElementById('message-input'), sendBtn: document.getElementById('send-btn'), attachBtn: document.getElementById('attach-btn'), attachTray: document.getElementById('attach-tray'), trayFileBtn: document.getElementById('tray-file-btn'), trayGifBtn: document.getElementById('tray-gif-btn'), fileInput: document.getElementById('file-input'),
             gifModal: document.getElementById('gif-modal'), closeGif: document.getElementById('close-gif'), gifSearch: document.getElementById('gif-search'), gifResults: document.getElementById('gif-results'),
             callBtn: document.getElementById('call-btn'), callOverlay: document.getElementById('call-overlay'), callName: document.getElementById('call-name'), callStatus: document.getElementById('call-status'), callAvatars: document.getElementById('call-avatars'), callAudioContainer: document.getElementById('call-audio-container'), acceptCallBtn: document.getElementById('accept-call-btn'), endCallBtn: document.getElementById('end-call-btn'),
             toastContainer: document.getElementById('toast-container')
@@ -291,10 +364,10 @@
 
         function showToast(msg, type = 'info') {
             const t = document.createElement('div');
-            t.className = `p-3 rounded-xl ${type === 'error' ? 'bg-rose-500' : 'bg-slate-800'} text-white text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 pointer-events-auto`;
-            t.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'info'}" class="w-4 h-4"></i> ${msg}`;
+            t.className = `px-4 py-3 rounded-lg ${type === 'error' ? 'bg-rose-600' : 'bg-white'} ${type === 'error' ? 'text-white' : 'text-black'} text-[10px] font-bold uppercase tracking-widest shadow-xl flex items-center gap-2 pointer-events-auto border border-zinc-200/10`;
+            t.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle-2'}" class="w-4 h-4"></i> ${msg}`;
             els.toastContainer.appendChild(t); lucide.createIcons();
-            setTimeout(() => t.remove(), 4000);
+            setTimeout(() => t.remove(), 3500);
         }
 
         // --- IP Fetch for True Local Discovery ---
@@ -303,97 +376,79 @@
                 const res = await fetch('https://api.ipify.org?format=json');
                 const data = await res.json();
                 myPublicIp = data.ip;
-                console.log("Local Node IP:", myPublicIp);
-            } catch(e) { console.warn("IP fetch failed, falling back to open local mode"); }
+                console.log("Network Node IP resolved.");
+            } catch(e) { myPublicIp = "fallback_local"; }
         }
 
-        // --- Boot & Auth ---
+        // --- Boot & Auth Persistence ---
         async function start() {
-            runBootSequence();
             await fetchPublicIP();
+            initGameLibrary(); // Prepare games tab data
             
+            setTimeout(() => {
+                els.bootOverlay.style.opacity = '0';
+                setTimeout(() => els.bootOverlay.classList.add('hidden'), 1000);
+                if (!auth.currentUser) els.loginOverlay.style.display = 'flex';
+            }, 2500);
+
             onAuthStateChanged(auth, async (user) => {
-                if (user && myUsername) {
-                    setupDiscovery();
-                    if (!isGuest) fetchFriends();
+                if (user) {
+                    const profRef = doc(db, 'artifacts', APP_ID, 'users', user.uid, 'account', 'profile');
+                    const snap = await getDoc(profRef);
+                    if (snap.exists()) {
+                        myUsername = snap.data().username;
+                        myAvatarUrl = snap.data().photoURL;
+                        isGuest = snap.data().isGuest || false;
+                        finalizeLogin();
+                    } else if (user.isAnonymous) {
+                        // Fresh anon login handling
+                    } else {
+                        els.loginOverlay.style.display = 'none';
+                        els.usernameOverlay.style.display = 'flex';
+                    }
                 }
             });
         }
 
-        async function runBootSequence() {
-            els.bootProgress.style.width = '100%';
-            const updates = ['update_1', 'update_2'];
-            for (let u of updates) {
-                try {
-                    els.bootText.textContent = `Injecting Core v4...`;
-                    await new Promise(r => setTimeout(r, 600));
-                } catch(e){}
-            }
-            els.bootText.textContent = "System Ready.";
-            setTimeout(() => {
-                els.bootOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    els.bootOverlay.classList.add('hidden');
-                    if (!myUsername) { els.loginOverlay.style.display = 'flex'; }
-                }, 1000);
-            }, 800);
-        }
-
-        // Guest Login
+        // Auth Buttons
         els.guestLoginBtn.onclick = async () => {
             isGuest = true;
             myUsername = "Guest_" + Math.floor(100 + Math.random() * 900);
-            await signInAnonymously(auth);
-            finalizeLogin();
+            try {
+                const cred = await signInAnonymously(auth);
+                const profRef = doc(db, 'artifacts', APP_ID, 'users', cred.user.uid, 'account', 'profile');
+                await setDoc(profRef, { username: myUsername, isGuest: true, uid: cred.user.uid });
+                finalizeLogin();
+            } catch (e) { showToast("Guest login failed", "error"); }
         };
 
-        // Google Login
         els.googleLoginBtn.onclick = async () => {
             try {
                 const provider = new GoogleAuthProvider();
                 const result = await signInWithPopup(auth, provider);
                 isGuest = false;
                 myAvatarUrl = result.user.photoURL;
-                
-                // Fetch Profile securely based on strict path rules
-                const profRef = doc(db, 'artifacts', APP_ID, 'users', result.user.uid, 'account', 'profile');
-                const snap = await getDoc(profRef);
-                
-                if (snap.exists()) {
-                    myUsername = snap.data().username;
-                    finalizeLogin();
-                } else {
-                    // New user, pick username
-                    els.loginOverlay.style.display = 'none';
-                    els.usernameOverlay.style.display = 'flex';
-                }
             } catch(e) { 
-                console.error(e);
-                // Graceful fallback for iframe sandbox limitations
                 if (e.message.includes("Cross-Origin") || e.message.includes("popup")) {
-                    showToast("Google Auth is blocked by the Sandbox Preview. Please deploy to GitHub/Netlify, or use 'Play as Guest' for now.", "error");
-                } else {
-                    showToast("Sign in failed: " + e.message, "error");
-                }
+                    showToast("Popups blocked. Use Guest mode or deploy site to use Google Auth.", "error");
+                } else { showToast("Sign in failed", "error"); }
             }
         };
 
-        // Create Profile
         els.usernameForm.onsubmit = async (e) => {
             e.preventDefault();
             const name = els.newUsernameInput.value.trim();
             if(!name || !auth.currentUser) return;
-            
             myUsername = name;
             const profRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'account', 'profile');
-            await setDoc(profRef, { username: myUsername, photoURL: myAvatarUrl, uid: auth.currentUser.uid });
-            
+            await setDoc(profRef, { username: myUsername, photoURL: myAvatarUrl, isGuest: false, uid: auth.currentUser.uid });
             els.usernameOverlay.style.display = 'none';
             finalizeLogin();
         };
 
         function finalizeLogin() {
             els.loginOverlay.style.display = 'none';
+            els.bootOverlay.classList.add('hidden');
             els.myProfile.classList.remove('hidden');
             
             if (myAvatarUrl) {
@@ -403,17 +458,15 @@
             } else {
                 els.myAvatarFallback.textContent = myUsername[0].toUpperCase();
             }
-            initPeer();
+            
+            if (!peer) initPeer();
+            if (!isGuest) { fetchFriends(); fetchFriendRequests(); }
         }
 
-        // Sign Out
         els.signOutBtn.onclick = async () => {
             if (confirm("Are you sure you want to sign out?")) {
-                if(auth.currentUser && myPeerId) {
-                    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
-                }
-                await signOut(auth);
-                location.reload();
+                if(auth.currentUser && myPeerId) await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
+                await signOut(auth); location.reload();
             }
         };
 
@@ -424,7 +477,7 @@
                 myPeerId = id;
                 my6DigitCode = Math.floor(100000 + Math.random() * 900000).toString();
                 els.pairingCodeText.textContent = my6DigitCode;
-                new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?code=${my6DigitCode}`, width: 120, height: 120, colorDark : "#0f172a", colorLight : "#ffffff" });
+                new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?code=${my6DigitCode}`, width: 140, height: 140, colorDark : "#09090b", colorLight : "#ffffff" });
                 
                 announcePresence();
                 setInterval(announcePresence, 15000);
@@ -437,12 +490,8 @@
             peer.on('connection', conn => conn.on('data', data => handleIncomingData(conn.peer, data)));
             peer.on('call', call => handleIncomingCall(call));
 
-            // Clean presence on close
             window.addEventListener('beforeunload', () => {
-                if(auth.currentUser && myPeerId) {
-                    // Send synchronous beacon request to guarantee wipe before tab closes
-                    deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
-                }
+                if(auth.currentUser && myPeerId) deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid));
             });
         }
 
@@ -450,7 +499,6 @@
             if(!auth.currentUser || !myPeerId) return;
             const pRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'weblink_presence', auth.currentUser.uid);
             await setDoc(pRef, { uid: auth.currentUser.uid, username: myUsername, peerId: myPeerId, code: my6DigitCode, ip: myPublicIp, avatar: myAvatarUrl, ts: Date.now() });
-            
             const lRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', my6DigitCode);
             await setDoc(lRef, { type: 'user', peerId: myPeerId, username: myUsername, uid: auth.currentUser.uid, avatar: myAvatarUrl, ts: Date.now() });
         }
@@ -462,77 +510,175 @@
                 networkUsers = [];
                 snap.forEach(d => {
                     const data = d.data();
-                    // Keep if not me AND recently seen
-                    if(data.uid !== auth.currentUser.uid && (now - data.ts < 45000)) {
-                        networkUsers.push(data);
-                    }
+                    if(data.uid !== auth.currentUser.uid && (now - data.ts < 45000)) networkUsers.push(data);
                 });
-                renderNetwork();
+                renderView();
             });
         }
 
+        // --- Friends System ---
         function fetchFriends() {
             const fCol = collection(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friends');
-            onSnapshot(fCol, snap => {
-                myFriends = [];
-                snap.forEach(d => myFriends.push(d.data()));
-                els.friendCount.textContent = myFriends.length;
-                renderNetwork();
+            onSnapshot(fCol, snap => { myFriends = []; snap.forEach(d => myFriends.push(d.data())); renderView(); });
+        }
+
+        function fetchFriendRequests() {
+            const rCol = collection(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friend_requests');
+            onSnapshot(rCol, snap => {
+                incomingRequests = [];
+                snap.forEach(d => incomingRequests.push({id: d.id, ...d.data()}));
+                if (incomingRequests.length > 0) {
+                    els.requestBadge.textContent = incomingRequests.length;
+                    els.requestBadge.classList.remove('hidden');
+                } else { els.requestBadge.classList.add('hidden'); }
+                renderView();
             });
         }
 
-        // --- UI Rendering ---
-        els.tabLocal.onclick = () => { viewMode = 'local'; updateTabs(); };
-        els.tabFriends.onclick = () => { viewMode = 'friends'; updateTabs(); };
-
-        function updateTabs() {
-            if (viewMode === 'local') {
-                els.tabLocal.className = "tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
-                els.tabFriends.className = "tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
-                els.viewTitle.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Nearby Devices`;
-                els.emptyTitle.textContent = "Scanning network...";
-                els.emptySub.textContent = "Only showing devices on your WiFi";
-                els.groupsGrid.style.display = 'grid';
-            } else {
-                els.tabLocal.className = "tab-inactive text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
-                els.tabFriends.className = "tab-active text-xs font-black uppercase tracking-widest pb-2 transition-colors flex-1 text-center";
-                els.viewTitle.innerHTML = `<i data-lucide="users" class="w-3 h-3 text-pink-500"></i> My Friends`;
-                els.emptyTitle.textContent = "No friends online.";
-                els.emptySub.textContent = "Add friends via Pairing Code";
-                els.groupsGrid.style.display = 'none';
-            }
-            renderNetwork();
+        async function sendFriendRequest(targetUid, targetName) {
+            if (isGuest) return showToast("Guests cannot add friends", "error");
+            const reqRef = doc(db, 'artifacts', APP_ID, 'users', targetUid, 'friend_requests', auth.currentUser.uid);
+            await setDoc(reqRef, { fromUid: auth.currentUser.uid, fromName: myUsername, fromAvatar: myAvatarUrl, ts: Date.now() });
+            showToast(`Friend request sent to ${targetName}`);
+            els.addFriendBtn.classList.add('hidden');
         }
 
-        function renderNetwork() {
-            els.usersGrid.innerHTML = '';
+        async function acceptFriendRequest(reqData) {
+            const myUid = auth.currentUser.uid;
+            await setDoc(doc(db, 'artifacts', APP_ID, 'users', myUid, 'friends', reqData.fromUid), { uid: reqData.fromUid, username: reqData.fromName, avatar: reqData.fromAvatar || "" });
+            await setDoc(doc(db, 'artifacts', APP_ID, 'users', reqData.fromUid, 'friends', myUid), { uid: myUid, username: myUsername, avatar: myAvatarUrl || "" });
+            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', myUid, 'friend_requests', reqData.id));
+            showToast(`${reqData.fromName} added!`);
+        }
+
+        async function rejectFriendRequest(reqId) {
+            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friend_requests', reqId));
+        }
+
+        // --- Mini-Games System ---
+        const GAME_LIBRARY = [
+            { id: 'pacman', title: 'Pac-Man', path: 'games/pacman.html', icon: 'ghost', type: 'JS Arcade' },
+            { id: 'mario', title: 'Super Mario Bros', path: 'games/smb.html', icon: 'gamepad-2', type: 'NES Emulator' },
+            { id: 'tetris', title: 'Tetris', path: 'games/tetris.html', icon: 'layout-grid', type: 'JS Puzzle' },
+            { id: 'zelda', title: 'Legend of Zelda', path: 'games/zelda.html', icon: 'sword', type: 'NES Emulator' }
+        ];
+
+        function initGameLibrary() {
+            els.gamesGrid.innerHTML = '';
+            GAME_LIBRARY.forEach(g => {
+                const c = document.createElement('div');
+                c.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-zinc-800 active:scale-95 transition-all text-center shadow-lg";
+                c.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-white"><i data-lucide="${g.icon}" class="w-5 h-5"></i></div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">${g.title}</h4>
+                        <p class="text-[9px] text-zinc-500 uppercase tracking-widest mt-1 font-mono">${g.type}</p>
+                    </div>
+                `;
+                c.onclick = () => launchGame(g);
+                els.gamesGrid.appendChild(c);
+            });
+            lucide.createIcons();
+        }
+
+        function launchGame(game) {
+            els.playingGameTitle.textContent = game.title;
+            // Get base URL for relative loading (removes index.html if present)
+            const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+            els.gameIframe.src = `${baseUrl}/${game.path}`;
+            els.gamePlayerOverlay.classList.remove('hidden');
+            els.gamePlayerOverlay.classList.add('flex');
+        }
+
+        els.closeGameBtn.onclick = () => {
+            els.gameIframe.src = ''; // Stops executing the iframe script/audio
+            els.gamePlayerOverlay.classList.add('hidden');
+            els.gamePlayerOverlay.classList.remove('flex');
+        };
+
+        // --- Tabs & UI Rendering ---
+        els.tabLocal.onclick = () => { viewMode = 'local'; updateTabs(); };
+        els.tabFriends.onclick = () => { viewMode = 'friends'; updateTabs(); };
+        els.tabGames.onclick = () => { viewMode = 'games'; updateTabs(); };
+
+        function updateTabs() {
+            const activeClass = "tab-active text-[10px] sm:text-xs font-bold uppercase tracking-widest pb-3 transition-colors flex-1 text-center flex justify-center items-center gap-1.5";
+            const inactiveClass = "tab-inactive text-[10px] sm:text-xs font-bold uppercase tracking-widest pb-3 transition-colors flex-1 text-center flex justify-center items-center gap-1.5";
             
-            // Filter logic
-            let displayUsers = [];
+            els.tabLocal.className = viewMode === 'local' ? activeClass : inactiveClass;
+            els.tabFriends.className = viewMode === 'friends' ? activeClass : inactiveClass;
+            els.tabGames.className = viewMode === 'games' ? activeClass : inactiveClass;
+
+            els.gamesSection.style.display = viewMode === 'games' ? 'block' : 'none';
+            els.requestsSection.style.display = viewMode === 'friends' ? 'block' : 'none';
+            els.networkHeader.style.display = viewMode === 'games' ? 'none' : 'flex';
+            
             if (viewMode === 'local') {
-                // TRUE LOCAL DISCOVERY: Exact IP match
-                displayUsers = networkUsers.filter(u => u.ip === myPublicIp);
+                els.viewTitle.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Nearby Devices`;
+                els.emptyTitle.textContent = "Scanning network...";
+                els.emptySub.textContent = "Waiting for peers to join your local node.";
+                els.groupsGrid.style.display = 'grid';
+                els.usersGrid.style.display = 'grid';
+            } else if (viewMode === 'friends') {
+                els.viewTitle.innerHTML = `<i data-lucide="users" class="w-3 h-3 text-white"></i> My Friends`;
+                els.emptyTitle.textContent = "No friends online.";
+                els.emptySub.textContent = "Add friends via their Link Code.";
+                els.groupsGrid.style.display = 'none';
+                els.usersGrid.style.display = 'grid';
             } else {
-                // FRIENDS: Check if UID is in myFriends array
-                displayUsers = networkUsers.filter(u => myFriends.some(f => f.uid === u.uid));
+                // Games View
+                els.groupsGrid.style.display = 'none';
+                els.usersGrid.style.display = 'none';
+                els.emptyState.style.display = 'none'; // Never show empty state in games
             }
+            renderView();
+        }
 
-            els.networkCount.textContent = `${displayUsers.length} ONLINE`;
+        function renderView() {
+            if (viewMode === 'games') return; // Handled by static HTML mostly
+
+            els.usersGrid.innerHTML = '';
+            els.requestsGrid.innerHTML = '';
+            
+            if (viewMode === 'friends' && incomingRequests.length > 0) {
+                incomingRequests.forEach(req => {
+                    const c = document.createElement('div');
+                    c.className = "p-3 bg-zinc-900 rounded-lg flex items-center justify-between border border-zinc-800";
+                    let avatarHtml = req.fromAvatar ? `<img src="${req.fromAvatar}" class="w-8 h-8 rounded-md object-cover">` : `<div class="w-8 h-8 rounded-md bg-zinc-800 flex items-center justify-center font-bold text-xs text-white">${req.fromName[0].toUpperCase()}</div>`;
+                    c.innerHTML = `
+                        <div class="flex items-center gap-3">${avatarHtml}<p class="font-bold text-sm">${req.fromName}</p></div>
+                        <div class="flex gap-2">
+                            <button class="accept-req p-2 bg-white text-black rounded-md active:scale-95"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                            <button class="reject-req p-2 bg-zinc-800 text-zinc-400 rounded-md active:scale-95"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    `;
+                    c.querySelector('.accept-req').onclick = () => acceptFriendRequest(req);
+                    c.querySelector('.reject-req').onclick = () => rejectFriendRequest(req.id);
+                    els.requestsGrid.appendChild(c);
+                });
+            }
+            
+            let displayUsers = [];
+            if (viewMode === 'local') displayUsers = networkUsers.filter(u => u.ip === myPublicIp);
+            else displayUsers = networkUsers.filter(u => myFriends.some(f => f.uid === u.uid));
+
+            els.networkCount.textContent = `${displayUsers.length} PEERS`;
+            
             const hasGroups = viewMode === 'local' && Object.keys(activeGroups).length > 0;
-            els.emptyState.style.display = (displayUsers.length || hasGroups) ? 'none' : 'flex';
+            const hasReqs = viewMode === 'friends' && incomingRequests.length > 0;
+            els.emptyState.style.display = (displayUsers.length || hasGroups || hasReqs) ? 'none' : 'flex';
 
-            // Groups (Only in Local view for now)
             if (viewMode === 'local') {
                 els.groupsGrid.innerHTML = '';
                 Object.values(activeGroups).forEach(g => {
                     const c = document.createElement('div');
-                    c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-pink-500/20 bg-pink-900/10 cursor-pointer";
+                    c.className = "p-4 bg-zinc-900 rounded-xl flex items-center justify-between active:scale-[0.98] transition-transform border border-zinc-800 cursor-pointer shadow-sm";
                     c.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-pink-600/20 flex items-center justify-center text-pink-400"><i data-lucide="users" class="w-4 h-4"></i></div>
+                            <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-white"><i data-lucide="users" class="w-5 h-5"></i></div>
                             <div>
-                                <p class="font-bold text-sm text-pink-100">${g.name}</p>
-                                <p class="text-[9px] text-pink-400/80 font-bold uppercase tracking-widest">${g.members.length} Members</p>
+                                <p class="font-bold text-sm text-white">${g.name}</p>
+                                <p class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest font-mono">${g.members.length} Members</p>
                             </div>
                         </div>
                     `;
@@ -541,19 +687,16 @@
                 });
             }
 
-            // Users
             displayUsers.forEach(u => {
                 const c = document.createElement('div');
-                c.className = "p-4 glass-panel rounded-2xl flex items-center justify-between active:scale-[0.98] transition-transform border border-white/5 cursor-pointer";
-                
-                let avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-9 h-9 rounded-full object-cover">` : `<div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-indigo-400">${u.username[0].toUpperCase()}</div>`;
-                
+                c.className = "p-4 bg-zinc-900 rounded-xl flex items-center justify-between active:scale-[0.98] transition-transform border border-zinc-800 cursor-pointer shadow-sm";
+                let avatarHtml = u.avatar ? `<img src="${u.avatar}" class="w-10 h-10 rounded-lg object-cover">` : `<div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-xs text-white">${u.username[0].toUpperCase()}</div>`;
                 c.innerHTML = `
                     <div class="flex items-center gap-3">
                         ${avatarHtml}
                         <div>
                             <p class="font-bold text-sm leading-tight">${u.username}</p>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">ID: ${u.code}</p>
+                            <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest font-mono">ID: ${u.code}</p>
                         </div>
                     </div>
                 `;
@@ -566,10 +709,9 @@
         // --- Groups & Pairing ---
         els.createGroupBtn.onclick = async () => {
             const gCode = "G-" + Math.floor(10000 + Math.random() * 90000).toString();
-            const groupData = { id: gCode, name: `Mesh ${gCode}`, members: [{ peerId: myPeerId, username: myUsername }], ts: Date.now() };
+            const groupData = { id: gCode, name: `Mesh ${gCode}`, hostUid: auth.currentUser.uid, members: [{ peerId: myPeerId, username: myUsername }], ts: Date.now() };
             await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', gCode), groupData);
             await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', gCode), { type: 'group', groupId: gCode, ts: Date.now() });
-            
             joinLocalGroup(groupData);
             openChat(gCode, groupData.name, null, true);
         };
@@ -580,9 +722,13 @@
                 if(snap.exists()) {
                     activeGroups[gData.id] = snap.data();
                     if(currentChatTarget === gData.id) updateChatHeader();
+                } else {
+                    delete activeGroups[gData.id];
+                    if(currentChatTarget === gData.id) els.closeChat.click();
                 }
+                renderView();
             });
-            renderNetwork();
+            renderView();
         }
 
         els.pairingBtn.onclick = () => els.pairingModal.classList.remove('hidden');
@@ -616,29 +762,53 @@
             } else { showToast("Code not found", "error"); }
         };
 
-        // --- Chat & Friends ---
+        // --- Chat UI ---
         function updateChatHeader() {
             if (currentChatTarget && currentChatTarget.startsWith('G-')) {
-                els.chatSubtitle.textContent = `${activeGroups[currentChatTarget]?.members.length || 0} IN MESH`;
+                const grp = activeGroups[currentChatTarget];
+                els.chatSubtitle.textContent = `${grp?.members.length || 0} MEMBERS`;
                 els.chatAvatarFallback.innerHTML = `<i data-lucide="users" class="w-4 h-4"></i>`;
-                els.chatAvatarFallback.className = "w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center text-white";
+                els.chatAvatarFallback.className = "w-8 h-8 rounded-md bg-white flex items-center justify-center text-black";
                 els.chatAvatarFallback.classList.remove('hidden'); els.chatAvatarImg.classList.add('hidden');
                 els.addFriendBtn.classList.add('hidden');
+                
+                els.leaveGroupBtn.classList.remove('hidden');
+                if (grp && grp.hostUid === auth.currentUser.uid) {
+                    els.leaveGroupBtn.innerHTML = `<i data-lucide="trash" class="w-3.5 h-3.5"></i> Delete`;
+                    els.leaveGroupBtn.onclick = async () => {
+                        if (confirm("Delete this group for everyone?")) {
+                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', currentChatTarget));
+                            await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'pairing_codes', currentChatTarget));
+                            els.closeChat.click();
+                        }
+                    };
+                } else {
+                    els.leaveGroupBtn.innerHTML = `<i data-lucide="log-out" class="w-3.5 h-3.5"></i> Leave`;
+                    els.leaveGroupBtn.onclick = async () => {
+                        await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'groups', currentChatTarget), {
+                            members: arrayRemove({ peerId: myPeerId, username: myUsername })
+                        });
+                        delete activeGroups[currentChatTarget];
+                        els.closeChat.click();
+                    };
+                }
             } else {
-                els.chatSubtitle.textContent = "P2P ENCRYPTED";
+                els.chatSubtitle.textContent = "P2P DIRECT";
                 if(currentChatUserObj && currentChatUserObj.avatar) {
                     els.chatAvatarImg.src = currentChatUserObj.avatar;
                     els.chatAvatarImg.classList.remove('hidden'); els.chatAvatarFallback.classList.add('hidden');
                 } else {
                     els.chatAvatarFallback.innerHTML = els.chatUsername.textContent[0].toUpperCase();
-                    els.chatAvatarFallback.className = "w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs";
+                    els.chatAvatarFallback.className = "w-8 h-8 rounded-md bg-white flex items-center justify-center font-bold text-xs text-black";
                     els.chatAvatarFallback.classList.remove('hidden'); els.chatAvatarImg.classList.add('hidden');
                 }
                 
-                // Show Add Friend button if not guest, not group, and not already friend
+                els.leaveGroupBtn.classList.add('hidden');
+                
                 if (!isGuest && currentChatUserObj && currentChatUserObj.uid) {
                     const isFr = myFriends.some(f => f.uid === currentChatUserObj.uid);
                     els.addFriendBtn.classList.toggle('hidden', isFr);
+                    els.addFriendBtn.onclick = () => sendFriendRequest(currentChatUserObj.uid, currentChatUserObj.username);
                 } else { els.addFriendBtn.classList.add('hidden'); }
             }
             lucide.createIcons();
@@ -655,14 +825,6 @@
 
         els.closeChat.onclick = () => { els.chatPanel.style.transform = 'translateY(100%)'; currentChatTarget = null; els.attachTray.classList.add('hidden'); };
 
-        els.addFriendBtn.onclick = async () => {
-            if(!currentChatUserObj || !currentChatUserObj.uid || isGuest) return;
-            const fRef = doc(db, 'artifacts', APP_ID, 'users', auth.currentUser.uid, 'friends', currentChatUserObj.uid);
-            await setDoc(fRef, { uid: currentChatUserObj.uid, username: currentChatUserObj.username, addedTs: Date.now() });
-            showToast(`${currentChatUserObj.username} added to friends!`);
-            updateChatHeader();
-        };
-
         // --- Messaging ---
         els.sendBtn.onclick = () => {
             const val = els.messageInput.value.trim();
@@ -670,17 +832,14 @@
             els.messageInput.value = '';
             sendPayload({ type: 'text', content: val });
         };
+        els.messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); els.sendBtn.click(); }});
 
         function sendPayload(payload) {
             const msg = { ...payload, sender: myPeerId, senderName: myUsername, ts: Date.now() };
             if (currentChatTarget.startsWith('G-')) {
                 msg.groupId = currentChatTarget;
                 const grp = activeGroups[currentChatTarget];
-                if(grp) {
-                    grp.members.forEach(m => {
-                        if (m.peerId !== myPeerId) { const c = peer.connect(m.peerId); c.on('open', () => c.send(msg)); }
-                    });
-                }
+                if(grp) grp.members.forEach(m => { if (m.peerId !== myPeerId) { const c = peer.connect(m.peerId); c.on('open', () => c.send(msg)); }});
                 saveMsg(currentChatTarget, { ...msg, isMe: true });
             } else {
                 const c = peer.connect(currentChatTarget);
@@ -707,9 +866,9 @@
             els.chatMessages.innerHTML = '';
             msgs.forEach(m => {
                 const div = document.createElement('div');
-                div.className = `max-w-[85%] px-4 py-3 rounded-2xl text-[13px] flex flex-col ${m.isMe ? 'bg-indigo-600 self-end rounded-br-none' : 'bg-slate-800 self-start rounded-bl-none border border-white/5'}`;
-                let head = (!m.isMe && currentChatTarget.startsWith('G-')) ? `<span class="text-[9px] font-black uppercase tracking-widest text-indigo-300 mb-1">${m.senderName}</span>` : '';
-                let cont = m.type === 'text' ? `<span>${m.content}</span>` : m.type === 'gif' ? `<img src="${m.url}" class="rounded-lg mt-1 max-h-48 object-cover">` : `<span class="italic text-slate-400">File attached: ${m.filename}</span>`; 
+                div.className = `max-w-[85%] px-4 py-3 rounded-2xl text-[13px] flex flex-col ${m.isMe ? 'bg-white text-black self-end rounded-br-sm' : 'bg-zinc-900 text-white self-start rounded-bl-sm border border-zinc-800'}`;
+                let head = (!m.isMe && currentChatTarget.startsWith('G-')) ? `<span class="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">${m.senderName}</span>` : '';
+                let cont = m.type === 'text' ? `<span>${m.content}</span>` : m.type === 'gif' ? `<img src="${m.url}" class="rounded-lg mt-1 max-h-48 object-cover">` : `<span class="italic text-zinc-400">File attached: ${m.filename}</span>`; 
                 div.innerHTML = head + cont;
                 els.chatMessages.appendChild(div);
             });
@@ -719,20 +878,13 @@
         // --- Attachments & GIF ---
         els.attachBtn.onclick = () => els.attachTray.classList.toggle('hidden');
         els.trayFileBtn.onclick = () => { els.attachTray.classList.add('hidden'); els.fileInput.click(); };
-        els.fileInput.onchange = (e) => {
-            const f = e.target.files[0];
-            if(f) { showToast("File simulated", "info"); sendPayload({ type: 'file', filename: f.name }); }
-        };
-        els.trayGifBtn.onclick = () => {
-            els.attachTray.classList.add('hidden'); els.gifModal.classList.remove('hidden');
-            setTimeout(() => els.gifModal.style.transform = 'translateY(0)', 10);
-            fetchGifs('trending');
-        };
+        els.fileInput.onchange = (e) => { const f = e.target.files[0]; if(f) { showToast("File simulated", "info"); sendPayload({ type: 'file', filename: f.name }); }};
+        els.trayGifBtn.onclick = () => { els.attachTray.classList.add('hidden'); els.gifModal.classList.remove('hidden'); setTimeout(() => els.gifModal.style.transform = 'translateY(0)', 10); fetchGifs('trending'); };
         els.closeGif.onclick = () => { els.gifModal.style.transform = 'translateY(100%)'; setTimeout(() => els.gifModal.classList.add('hidden'), 300); };
         let gTimer; els.gifSearch.onkeyup = (e) => { clearTimeout(gTimer); gTimer = setTimeout(() => fetchGifs(e.target.value.trim() || 'trending'), 500); };
 
         async function fetchGifs(q) {
-            els.gifResults.innerHTML = '<div class="col-span-2 text-center text-slate-500 py-10"><i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto"></i></div>'; lucide.createIcons();
+            els.gifResults.innerHTML = '<div class="col-span-2 text-center text-zinc-500 py-10"><i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto"></i></div>'; lucide.createIcons();
             try {
                 const res = await fetch(`https://g.tenor.com/v1/${q==='trending'?'trending':'search'}?q=${encodeURIComponent(q)}&key=${TENOR_API_KEY}&limit=20`);
                 const data = await res.json();
@@ -748,8 +900,8 @@
         // --- Calling ---
         function getAvatarNode(id, name) {
             const el = document.createElement('div'); el.id = `avatar-${id}`;
-            el.className = "w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center text-2xl font-bold border-2 border-indigo-500 pulse-ring relative";
-            el.innerHTML = `${name[0].toUpperCase()}<div class="absolute -bottom-2 bg-slate-900 px-2 py-0.5 rounded text-[8px] uppercase tracking-widest border border-white/10 whitespace-nowrap">${name}</div>`;
+            el.className = "w-20 h-20 bg-zinc-900 rounded-2xl flex items-center justify-center text-2xl font-bold border border-zinc-800 relative";
+            el.innerHTML = `${name[0].toUpperCase()}<div class="absolute -bottom-3 bg-white text-black px-2 py-0.5 rounded text-[9px] uppercase tracking-widest font-bold whitespace-nowrap">${name}</div>`;
             return el;
         }
 
@@ -797,7 +949,7 @@
             activeCalls.push(call);
             call.on('stream', r => {
                 els.callStatus.textContent = "Active";
-                const av = document.getElementById(`avatar-${peerId}`); if(av) av.classList.add('border-emerald-500');
+                const av = document.getElementById(`avatar-${peerId}`); if(av) { av.classList.remove('border-zinc-800'); av.classList.add('border-white'); }
                 const aNode = document.createElement('audio'); aNode.autoplay = true; aNode.srcObject = r; aNode.id = `audio-${peerId}`;
                 els.callAudioContainer.appendChild(aNode);
             });
